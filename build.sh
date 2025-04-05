@@ -18,33 +18,63 @@ BUILD_DIR="./build"
 CXX="${CXX:-g++}"
 CXX_LD="${CXX_LD:-ld}"
 
+## get dynamically
+
+OOPETRIS_INSTALL_ROOT="/usr/local/oopetris_root"
+
+export LD_LIBRARY_PATH="${OOPETRIS_INSTALL_ROOT}/lib/x86_64-linux-gnu/"
+export PKG_CONFIG_PATH="${OOPETRIS_INSTALL_ROOT}/lib/x86_64-linux-gnu/pkgconfig"
+
+C_FLAGS="$(pkg-config oopetris-recordings --cflags)"
+LIBS="$(pkg-config oopetris-recordings --libs)"
+
+function compile_single_cpp_file() {
+
+    CPP_BASE_NAME="$1"
+
+    "$CXX" "-std=c++23" -c -fPIC "-I${JAVA_ROOT}/include" "-I${JAVA_ROOT}/include/linux" "${CPP_CODE_ROOT}/${CPP_BASE_NAME}.cpp" -o "${BUILD_DIR}/${CPP_BASE_NAME}.o" $C_FLAGS
+
+}
+
 function build_cpp_code() {
-
-    OOPETRIS_INSTALL_ROOT="/usr/local/oopetris_root"
-
-    export LD_LIBRARY_PATH="${OOPETRIS_INSTALL_ROOT}/lib/x86_64-linux-gnu/"
-    export PKG_CONFIG_PATH="${OOPETRIS_INSTALL_ROOT}/lib/x86_64-linux-gnu/pkgconfig"
-
-    C_FLAGS="$(pkg-config oopetris-recordings --cflags)"
-    LIBS="$(pkg-config oopetris-recordings --libs)"
 
     mkdir -p "$BUILD_DIR"
 
-    "$CXX" "-std=c++23" -c -fPIC "-I${JAVA_ROOT}/include" "-I${JAVA_ROOT}/include/linux" "${CPP_CODE_ROOT}/com_github_oopetris_Recordings.cpp" -o "${BUILD_DIR}/com_github_oopetris_Recordings.o" $C_FLAGS
+    compile_single_cpp_file "com_github_oopetris_Recordings"
 
-    "$CXX" "-std=c++23" -c -fPIC "-I${JAVA_ROOT}/include" "-I${JAVA_ROOT}/include/linux" "${CPP_CODE_ROOT}/convert.cpp" -o "${BUILD_DIR}/convert.o" $C_FLAGS
+    compile_single_cpp_file "convert"
 
-    "$CXX" "-std=c++23" -c -fPIC "-I${JAVA_ROOT}/include" "-I${JAVA_ROOT}/include/linux" "${CPP_CODE_ROOT}/helper.cpp" -o "${BUILD_DIR}/helper.o" $C_FLAGS
+    compile_single_cpp_file "helper"
 
     # link
     "$CXX_LD" -shared -fPIC -o "${BUILD_DIR}/liboopetris_recordings_java_native.so" "${BUILD_DIR}/com_github_oopetris_Recordings.o" "${BUILD_DIR}/convert.o" "${BUILD_DIR}/helper.o" $LIBS
 
 }
 
+function compile_single_java_source_file() {
+
+    JAVA_BASE_NAME="$1"
+
+    javac -cp "${JAVA_CODE_ROOT}" "${JAVA_CODE_ROOT}/$JAVA_PACKAGE_NAME/${JAVA_BASE_NAME}.java"
+
+}
+
 function build_java_code() {
 
     # source files
-    javac -cp "${JAVA_CODE_ROOT}" "${JAVA_CODE_ROOT}/$JAVA_PACKAGE_NAME/Recordings.java"
+    compile_single_java_source_file "AdditionalInformationValue"
+    compile_single_java_source_file "GridProperties"
+    compile_single_java_source_file "InputEvent"
+    compile_single_java_source_file "Mino"
+    compile_single_java_source_file "MinoPosition"
+    compile_single_java_source_file "RecordingInformation"
+    compile_single_java_source_file "RecordingProperties"
+    compile_single_java_source_file "Recordings"
+    compile_single_java_source_file "TetrionHeader"
+    compile_single_java_source_file "TetrionSnapshot"
+    compile_single_java_source_file "TetrominoType"
+    compile_single_java_source_file "VariantType"
+    compile_single_java_source_file "VariantTypeMismatch"
 
     # test files
     javac -cp "${JAVA_TEST_ROOT}:${JAVA_CODE_ROOT}" "${JAVA_TEST_ROOT}/$JAVA_PACKAGE_NAME/RecordingsTest.java"
@@ -59,7 +89,7 @@ function run_tests() {
 
 function main() {
 
-    build_cpp_code
+    # build_cpp_code
     build_java_code
     run_tests
 

@@ -1,6 +1,7 @@
 package com.github.oopetris;
 
-//import com.github.oopetris.RecordingInformation;
+import com.github.oopetris.RecordingInformation;
+import com.github.oopetris.RecordingProperties;
 
 public class Recordings {
 
@@ -10,5 +11,9 @@ public class Recordings {
 
     public static native boolean isRecordingFile(String path);
 
-    // private static native RecordingInformation getInformation(String path);
+    public static native RecordingInformation getInformation(String path);
+
+    public static native RecordingsProperties getProperties();
+
+    public static native String getVersion();
 }

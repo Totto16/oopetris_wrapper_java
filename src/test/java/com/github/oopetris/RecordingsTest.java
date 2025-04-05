@@ -13,12 +13,16 @@ public class RecordingsTest {
         //TODO
         String path = name;
 
-        return name;
+        return path;
     }
 
 
+    //TODO: use proper unit testing framework
+    
     public void test() {
-        Recordings.isRecordingFile(this.getFilePath("test"));
+        boolean result = Recordings.isRecordingFile(this.getFilePath("test"));
+
+        System.out.printf("Result is %b%n",result);
     }
 
     public static void main(String[] args) {
