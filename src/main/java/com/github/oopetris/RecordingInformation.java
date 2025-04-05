@@ -7,7 +7,7 @@ import com.github.oopetris.TetrionSnapshot;
 
 import java.util.List;
 import java.util.Map;
-import org.joou.Unsigned.UByte
+import org.joou.UByte;
 
         public class RecordingInformation {
     public List<Map<String, AdditionalInformationValue>> information;
@@ -17,7 +17,7 @@ import org.joou.Unsigned.UByte
     public UByte version;
 
     public RecordingInformation(
-            List<AdditionalInformation> information, List<TetrionRecord> records, List<TetrionSnapshot> snapshots,
+            List<Map<String, AdditionalInformationValue>> information, List<TetrionRecord> records, List<TetrionSnapshot> snapshots,
             List<TetrionHeader> tetrionHeaders, UByte version
     ) {
         this.information = information;

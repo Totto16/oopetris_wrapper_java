@@ -1,8 +1,8 @@
 package com.github.oopetris;
 
-import org.joou.Unsigned.UByte;
-import org.joou.Unsigned.UInteger;
-import org.joou.Unsigned.ULong;
+import org.joou.UByte;
+import org.joou.UInteger;
+import org.joou.ULong;
 
 import java.util.List;
 

@@ -2,8 +2,8 @@ package com.github.oopetris;
 
 import com.github.oopetris.InputEvent;
 
-import org.joou.Unsigned.UByte;
-import org.joou.Unsigned.ULong;
+import org.joou.UByte;
+import org.joou.ULong;
 
 
 public class TetrionRecord {

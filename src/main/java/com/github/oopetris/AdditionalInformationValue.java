@@ -2,9 +2,9 @@ package com.github.oopetris;
 
 import com.github.oopetris.VariantType;
 
-import org.joou.Unsigned.UByte;
-import org.joou.Unsigned.UInteger;
-import org.joou.Unsigned.ULong;
+import org.joou.UByte;
+import org.joou.UInteger;
+import org.joou.ULong;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -147,12 +147,12 @@ public class AdditionalInformationValue {
         throw new RuntimeException("Invalid Variant Implementation, wrong object assigned: " + this.type.name);
     }
 
-    public Ineteger getInetegerValue() {
+    public Integer getIntegerValue() {
         if (this.type != VariantType.Type_I32) {
             throw new VariantTypeMismatch(VariantType.Type_I32, this.type);
         }
 
-        if (this.value instanceof Ineteger result) {
+        if (this.value instanceof Integer result) {
             return result;
         }
 
@@ -183,12 +183,13 @@ public class AdditionalInformationValue {
         throw new RuntimeException("Invalid Variant Implementation, wrong object assigned: " + this.type.name);
     }
 
+    @SuppressWarnings("unchecked")
     public List<AdditionalInformationValue> getListValue() {
         if (this.type != VariantType.Type_I64) {
             throw new VariantTypeMismatch(VariantType.Type_I64, this.type);
         }
 
-        if (this.value instanceof List result) {
+        if (this.value instanceof List<?> result) {
             if (result.isEmpty()) {
                 return new ArrayList<AdditionalInformationValue>();
             }

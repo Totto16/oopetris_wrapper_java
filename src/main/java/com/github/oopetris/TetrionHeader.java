@@ -1,7 +1,7 @@
 package com.github.oopetris;
 
-import org.joou.Unsigned.UInteger;
-import org.joou.Unsigned.ULong;
+import org.joou.UInteger;
+import org.joou.ULong;
 
 public class TetrionHeader {
     public ULong seed;

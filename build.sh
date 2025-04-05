@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-set -ex
+set -e
 set -o pipefail
 
 ## folder constants
@@ -55,9 +55,11 @@ function compile_single_java_source_file() {
 
     JAVA_BASE_NAME="$1"
 
-    javac -cp "${JAVA_CODE_ROOT}" "${JAVA_CODE_ROOT}/$JAVA_PACKAGE_NAME/${JAVA_BASE_NAME}.java"
+    javac -cp "${JAVA_CODE_ROOT}:${LIBS_PATHS}" "${JAVA_CODE_ROOT}/$JAVA_PACKAGE_NAME/${JAVA_BASE_NAME}.java"
 
 }
+
+LIBS_PATHS="./src/libs/joou-0.9.4.jar"
 
 function build_java_code() {
 
@@ -77,13 +79,13 @@ function build_java_code() {
     compile_single_java_source_file "VariantTypeMismatch"
 
     # test files
-    javac -cp "${JAVA_TEST_ROOT}:${JAVA_CODE_ROOT}" "${JAVA_TEST_ROOT}/$JAVA_PACKAGE_NAME/RecordingsTest.java"
+    javac -cp "${JAVA_TEST_ROOT}:${JAVA_CODE_ROOT}:${LIBS_PATHS}" "${JAVA_TEST_ROOT}/$JAVA_PACKAGE_NAME/RecordingsTest.java"
 
 }
 
 function run_tests() {
 
-    java -cp "${JAVA_TEST_ROOT}:${JAVA_CODE_ROOT}" "-Djava.library.path=$(realpath "${BUILD_DIR}")" "com.github.oopetris.RecordingsTest"
+    java -cp "${JAVA_TEST_ROOT}:${JAVA_CODE_ROOT}:${LIBS_PATHS}" "-Djava.library.path=$(realpath "${BUILD_DIR}")" "com.github.oopetris.RecordingsTest"
 
 }
 

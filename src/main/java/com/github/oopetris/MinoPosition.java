@@ -1,6 +1,6 @@
 package com.github.oopetris;
 
-import org.joou.Unsigned.UByte;
+import org.joou.UByte;
 
 public class MinoPosition {
     public UByte x;

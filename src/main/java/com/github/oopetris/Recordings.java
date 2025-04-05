@@ -13,7 +13,7 @@ public class Recordings {
 
     public static native RecordingInformation getInformation(String path);
 
-    public static native RecordingsProperties getProperties();
+    public static native RecordingProperties getProperties();
 
     public static native String getVersion();
 }

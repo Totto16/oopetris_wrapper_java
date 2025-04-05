@@ -2,8 +2,9 @@ package com.github.oopetris;
 
 import com.github.oopetris.Mino;
 
-import org.joou.Unsigned.UInteger;
-import org.joou.Unsigned.ULong;
+import org.joou.UInteger;
+import org.joou.ULong;
+import org.joou.UByte;
 
 import java.util.List;
 
@@ -16,7 +17,7 @@ public class TetrionSnapshot {
     public ULong simulationStepIndex;
     public UByte tetrionIndex;
 
-    public TetrionHeader(
+    public TetrionSnapshot(
             UInteger level, UInteger linesCleared, List<Mino> minoStack, ULong score, ULong simulationStepIndex,
             UByte tetrionIndex
     ) {

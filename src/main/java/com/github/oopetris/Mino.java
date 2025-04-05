@@ -5,10 +5,10 @@ import com.github.oopetris.TetrominoType;
 
 public class Mino {
     public MinoPosition position;
-    public TetrominoType type :
+    public TetrominoType type;
 
 
-        public Mino(MinoPosition position, TetrominoType type) {
+    public Mino(MinoPosition position, TetrominoType type) {
         this.position = position;
         this.type = type;
     }

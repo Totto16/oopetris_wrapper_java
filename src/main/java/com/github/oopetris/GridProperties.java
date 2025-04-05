@@ -1,6 +1,6 @@
 package com.github.oopetris;
 
-import org.joou.Unsigned.UByte;
+import org.joou.UByte;
 
 public class GridProperties {
     public UByte height;
@@ -10,13 +10,5 @@ public class GridProperties {
     public GridProperties(UByte height, UByte width) {
         this.height = height;
         this.width = width;
-    }
-
-    public int getHeight() {
-        return this.height;
-    }
-
-    public int getWidth() {
-        return this.width;
     }
 }
