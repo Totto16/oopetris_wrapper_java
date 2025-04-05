@@ -1,19 +1,30 @@
 package com.github.oopetris;
 
-import com.github.oopetris.RecordingInformation;
-import com.github.oopetris.RecordingProperties;
+import java.io.File;
 
 public class Recordings {
 
-    static {
-        System.loadLibrary("oopetris_recordings_java_native");
-    }
+	private Recordings() {
+        
+	}
 
-    public static native boolean isRecordingFile(String path);
+	static {
+		System.loadLibrary("oopetris_recordings_java_native");
+	}
 
-    public static native RecordingInformation getInformation(String path);
+	public static native boolean isRecordingFile(String path);
 
-    public static native RecordingProperties getProperties();
+	public static native RecordingInformation getInformation(String path);
 
-    public static native String getVersion();
+	public static boolean isRecordingFile(File file) {
+		return isRecordingFile(file.getAbsolutePath());
+	}
+
+	public static RecordingInformation getInformation(File file) {
+		return getInformation(file.getAbsolutePath());
+	}
+
+	public static native RecordingProperties getProperties();
+
+	public static native String getVersion();
 }

@@ -1,7 +1,5 @@
 package com.github.oopetris;
 
-import com.github.oopetris.VariantType;
-
 import org.joou.UByte;
 import org.joou.UInteger;
 import org.joou.ULong;
@@ -13,8 +11,8 @@ import java.util.List;
 public class AdditionalInformationValue {
 
 
-    private VariantType type;
-    private Object value;
+    private final VariantType type;
+    private final Object value;
 
 
     public AdditionalInformationValue(String value) {
@@ -84,7 +82,7 @@ public class AdditionalInformationValue {
             return result;
         }
 
-        throw new RuntimeException("Invalid Variant Implementation, wrong object assigned: " + this.type.name);
+        throw new ClassCastException("Invalid Variant Implementation, wrong object assigned: " + this.type.getName());
     }
 
     public Float getFloatValue() {
@@ -96,7 +94,7 @@ public class AdditionalInformationValue {
             return result;
         }
 
-        throw new RuntimeException("Invalid Variant Implementation, wrong object assigned: " + this.type.name);
+        throw new ClassCastException("Invalid Variant Implementation, wrong object assigned: " + this.type.getName());
     }
 
     public Double getDoubleValue() {
@@ -108,7 +106,7 @@ public class AdditionalInformationValue {
             return result;
         }
 
-        throw new RuntimeException("Invalid Variant Implementation, wrong object assigned: " + this.type.name);
+        throw new ClassCastException("Invalid Variant Implementation, wrong object assigned: " + this.type.getName());
     }
 
     public UByte getUByteValue() {
@@ -120,7 +118,7 @@ public class AdditionalInformationValue {
             return result;
         }
 
-        throw new RuntimeException("Invalid Variant Implementation, wrong object assigned: " + this.type.name);
+        throw new ClassCastException("Invalid Variant Implementation, wrong object assigned: " + this.type.getName());
     }
 
     public Byte getByteValue() {
@@ -132,7 +130,7 @@ public class AdditionalInformationValue {
             return result;
         }
 
-        throw new RuntimeException("Invalid Variant Implementation, wrong object assigned: " + this.type.name);
+        throw new ClassCastException("Invalid Variant Implementation, wrong object assigned: " + this.type.getName());
     }
 
     public UInteger getUIntegerValue() {
@@ -144,7 +142,7 @@ public class AdditionalInformationValue {
             return result;
         }
 
-        throw new RuntimeException("Invalid Variant Implementation, wrong object assigned: " + this.type.name);
+        throw new ClassCastException("Invalid Variant Implementation, wrong object assigned: " + this.type.getName());
     }
 
     public Integer getIntegerValue() {
@@ -156,7 +154,7 @@ public class AdditionalInformationValue {
             return result;
         }
 
-        throw new RuntimeException("Invalid Variant Implementation, wrong object assigned: " + this.type.name);
+        throw new ClassCastException("Invalid Variant Implementation, wrong object assigned: " + this.type.getName());
     }
 
     public ULong getULongValue() {
@@ -168,7 +166,7 @@ public class AdditionalInformationValue {
             return result;
         }
 
-        throw new RuntimeException("Invalid Variant Implementation, wrong object assigned: " + this.type.name);
+        throw new ClassCastException("Invalid Variant Implementation, wrong object assigned: " + this.type.getName());
     }
 
     public Long getLongValue() {
@@ -180,7 +178,7 @@ public class AdditionalInformationValue {
             return result;
         }
 
-        throw new RuntimeException("Invalid Variant Implementation, wrong object assigned: " + this.type.name);
+        throw new ClassCastException("Invalid Variant Implementation, wrong object assigned: " + this.type.getName());
     }
 
     @SuppressWarnings("unchecked")
@@ -191,16 +189,16 @@ public class AdditionalInformationValue {
 
         if (this.value instanceof List<?> result) {
             if (result.isEmpty()) {
-                return new ArrayList<AdditionalInformationValue>();
+                return new ArrayList<>();
             }
 
             if (result.get(0) instanceof AdditionalInformationValue) {
                 return (List<AdditionalInformationValue>) result;
             }
 
-            throw new RuntimeException("Invalid Variant Implementation, List has invalid elements in it");
+            throw new ClassCastException("Invalid Variant Implementation, List has invalid elements in it");
         }
 
-        throw new RuntimeException("Invalid Variant Implementation, wrong object assigned: " + this.type.name);
+        throw new ClassCastException("Invalid Variant Implementation, wrong object assigned: " + this.type.getName());
     }
 }

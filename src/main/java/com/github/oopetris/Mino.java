@@ -1,8 +1,5 @@
 package com.github.oopetris;
 
-import com.github.oopetris.MinoPosition;
-import com.github.oopetris.TetrominoType;
-
 public class Mino {
     public MinoPosition position;
     public TetrominoType type;

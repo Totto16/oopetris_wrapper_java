@@ -20,12 +20,17 @@ public enum VariantType {
     Type_I64("I64", Long.class),
     Type_List("List", List.class);
 
-    public final String name;
+    private final String nameString;
 
     public final Class<?> typeInstance;
 
     private VariantType(String name, Class<?> typeInstance) {
-        this.name = name;
+        this.nameString = name;
         this.typeInstance = typeInstance;
     }
+
+    public String getName(){
+        return this.nameString;
+    }
+
 }

@@ -1,24 +1,20 @@
 package com.github.oopetris;
 
-import com.github.oopetris.AdditionalInformationValue;
-import com.github.oopetris.TetrionHeader;
-import com.github.oopetris.TetrionRecord;
-import com.github.oopetris.TetrionSnapshot;
+import org.joou.UByte;
 
 import java.util.List;
 import java.util.Map;
-import org.joou.UByte;
 
-        public class RecordingInformation {
-    public List<Map<String, AdditionalInformationValue>> information;
+public class RecordingInformation {
+    public Map<String, AdditionalInformationValue> information;
     public List<TetrionRecord> records;
     public List<TetrionSnapshot> snapshots;
     public List<TetrionHeader> tetrionHeaders;
     public UByte version;
 
     public RecordingInformation(
-            List<Map<String, AdditionalInformationValue>> information, List<TetrionRecord> records, List<TetrionSnapshot> snapshots,
-            List<TetrionHeader> tetrionHeaders, UByte version
+            Map<String, AdditionalInformationValue> information, List<TetrionRecord> records,
+            List<TetrionSnapshot> snapshots, List<TetrionHeader> tetrionHeaders, UByte version
     ) {
         this.information = information;
         this.records = records;

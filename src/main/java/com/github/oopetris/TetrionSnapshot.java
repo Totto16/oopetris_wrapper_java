@@ -1,7 +1,5 @@
 package com.github.oopetris;
 
-import com.github.oopetris.Mino;
-
 import org.joou.UInteger;
 import org.joou.ULong;
 import org.joou.UByte;

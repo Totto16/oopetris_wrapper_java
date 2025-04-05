@@ -8,10 +8,13 @@ public class VariantTypeMismatch extends RuntimeException {
 
     public VariantTypeMismatch(VariantType expectedType, VariantType actualType) {
         super("VariantTypeMismatch");
+
+        this.expectedType = expectedType;
+        this.actualType=actualType;
     }
 
     @Override
     public String getMessage() {
-        return String.format("Expected type %s but got %s", this.expectedType.name, this.actualType.name);
+        return String.format("Expected type %s but got %s", this.expectedType.getName(), this.actualType.getName());
     }
 }

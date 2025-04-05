@@ -1,7 +1,5 @@
 package com.github.oopetris;
 
-import com.github.oopetris.InputEvent;
-
 import org.joou.UByte;
 import org.joou.ULong;
 
