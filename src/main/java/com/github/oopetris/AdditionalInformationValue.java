@@ -6,6 +6,7 @@ import org.joou.ULong;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 public class AdditionalInformationValue {
@@ -200,5 +201,21 @@ public class AdditionalInformationValue {
         }
 
         throw new ClassCastException("Invalid Variant Implementation, wrong object assigned: " + this.type.getName());
+    }
+
+    @Override
+    public final boolean equals(Object o) {
+        if (!(o instanceof AdditionalInformationValue that)) {
+            return false;
+        }
+
+        return getType() == that.getType() && Objects.equals(value, that.value);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getType().hashCode();
+        result = 31 * result + Objects.hashCode(value);
+        return result;
     }
 }

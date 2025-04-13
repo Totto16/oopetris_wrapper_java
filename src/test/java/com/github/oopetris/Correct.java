@@ -3,8 +3,6 @@ package com.github.oopetris;
 import static org.joou.Unsigned.*;
 
 import org.joou.UByte;
-import org.joou.UInteger;
-import org.joou.ULong;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,7 +21,6 @@ public class Correct {
         information.put("date", new AdditionalInformationValue(ulong(1710635321)));
 
         information.put("platform", new AdditionalInformationValue("pc"));
-
 
         return information;
     }
@@ -686,9 +683,8 @@ public class Correct {
         return records;
     }
 
-    private static List<TetrionRecord> getSnapshots() {
+    private static List<TetrionSnapshot> getSnapshots() {
         List<TetrionSnapshot> snapshots = new ArrayList<>();
-
 
         snapshots.add(new TetrionSnapshot(
                 uint(0), uint(0),
