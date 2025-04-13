@@ -28,4 +28,12 @@ public class MinoPosition {
         result = 31 * result + Objects.hashCode(y);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "MinoPosition{" +
+                "x=" + x +
+                ", y=" + y +
+                '}';
+    }
 }

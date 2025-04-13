@@ -26,4 +26,12 @@ public class Mino {
         result = 31 * result + Objects.hashCode(type);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "Mino{" +
+                "position=" + position +
+                ", type=" + type +
+                '}';
+    }
 }

@@ -12,6 +12,8 @@ public class RecordingProperties {
 
     @Override
     public final boolean equals(Object o) {
+        System.err.println("HERE EQUALS" + o);
+
         if (!(o instanceof RecordingProperties that)) {
             return false;
         }
@@ -22,5 +24,12 @@ public class RecordingProperties {
     @Override
     public int hashCode() {
         return Objects.hashCode(gridProperties);
+    }
+
+    @Override
+    public String toString() {
+        return "RecordingProperties{" +
+                "gridProperties=" + gridProperties +
+                '}';
     }
 }

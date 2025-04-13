@@ -33,4 +33,9 @@ public enum VariantType {
         return this.nameString;
     }
 
+    @Override
+    public String toString() {
+        return "VariantType." + nameString;
+    }
+
 }

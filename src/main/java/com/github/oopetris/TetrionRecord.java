@@ -34,4 +34,13 @@ public class TetrionRecord {
         result = 31 * result + Objects.hashCode(tetrionIndex);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "TetrionRecord{" +
+                "event=" + event +
+                ", simulationStepIndex=" + simulationStepIndex +
+                ", tetrionIndex=" + tetrionIndex +
+                '}';
+    }
 }

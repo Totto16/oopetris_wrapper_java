@@ -19,9 +19,14 @@ public enum InputEvent {
     HoldReleased("HoldReleased");
 
 
-    public final String name;
+    public final String nameString;
 
     private InputEvent(String name) {
-        this.name = name;
+        this.nameString = name;
+    }
+
+    @Override
+    public String toString() {
+        return "InputEvent." + nameString;
     }
 }

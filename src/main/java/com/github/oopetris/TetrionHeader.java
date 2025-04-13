@@ -29,4 +29,12 @@ public class TetrionHeader {
         result = 31 * result + Objects.hashCode(startingLevel);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "TetrionHeader{" +
+                "seed=" + seed +
+                ", startingLevel=" + startingLevel +
+                '}';
+    }
 }

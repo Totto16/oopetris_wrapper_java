@@ -28,4 +28,12 @@ public class GridProperties {
         result = 31 * result + Objects.hashCode(width);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "GridProperties{" +
+                "height=" + height +
+                ", width=" + width +
+                '}';
+    }
 }

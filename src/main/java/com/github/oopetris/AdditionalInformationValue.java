@@ -21,6 +21,11 @@ public class AdditionalInformationValue {
         this.value = value;
     }
 
+    public AdditionalInformationValue(Boolean value) {
+        this.type = VariantType.Type_Bool;
+        this.value = value;
+    }
+
     public AdditionalInformationValue(Float value) {
         this.type = VariantType.Type_Float;
         this.value = value;
@@ -80,6 +85,18 @@ public class AdditionalInformationValue {
         }
 
         if (this.value instanceof String result) {
+            return result;
+        }
+
+        throw new ClassCastException("Invalid Variant Implementation, wrong object assigned: " + this.type.getName());
+    }
+
+    public Boolean getBoolValue() {
+        if (this.type != VariantType.Type_Bool) {
+            throw new VariantTypeMismatch(VariantType.Type_Bool, this.type);
+        }
+
+        if (this.value instanceof Boolean result) {
             return result;
         }
 
@@ -217,5 +234,61 @@ public class AdditionalInformationValue {
         int result = getType().hashCode();
         result = 31 * result + Objects.hashCode(value);
         return result;
+    }
+
+    public String getValueAsString() {
+
+        switch (this.type) {
+            case Type_I8 -> {
+                return getByteValue().toString();
+            }
+            case Type_U8 -> {
+                return getUByteValue().toString();
+            }
+            case Type_I32 -> {
+                return getIntegerValue().toString();
+            }
+            case Type_U32 -> {
+                return getUIntegerValue().toString();
+            }
+            case Type_I64 -> {
+                return getLongValue().toString();
+            }
+            case Type_U64 -> {
+                return getULongValue().toString();
+            }
+            case Type_Str -> {
+                return getStringValue();
+            }
+            case Type_Bool -> {
+                return getBoolValue().toString();
+            }
+            case Type_Float -> {
+                return getFloatValue().toString();
+            }
+            case Type_Double -> {
+                return getDoubleValue().toString();
+            }
+            case Type_List -> {
+                List<AdditionalInformationValue> list = getListValue();
+
+                List<String> strList = list.stream().map(AdditionalInformationValue::toString).toList();
+                return String.join(" : ", strList);
+
+            }
+            default -> {
+                throw new RuntimeException("getValueAsString: Unhandled type: " + this.type);
+            }
+
+        }
+
+    }
+
+    @Override
+    public String toString() {
+        return "AdditionalInformationValue{" +
+                "type=" + type +
+                ", value=" + this.getValueAsString() +
+                '}';
     }
 }

@@ -46,4 +46,15 @@ public class RecordingInformation {
         result = 31 * result + Objects.hashCode(version);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "RecordingInformation{" +
+                "information=" + information +
+                ", records=" + records +
+                ", snapshots=" + snapshots +
+                ", tetrionHeaders=" + tetrionHeaders +
+                ", version=" + version +
+                '}';
+    }
 }

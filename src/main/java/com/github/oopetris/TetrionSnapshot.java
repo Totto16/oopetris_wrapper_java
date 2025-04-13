@@ -50,4 +50,16 @@ public class TetrionSnapshot {
         result = 31 * result + Objects.hashCode(tetrionIndex);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "TetrionSnapshot{" +
+                "level=" + level +
+                ", linesCleared=" + linesCleared +
+                ", minoStack=" + minoStack +
+                ", score=" + score +
+                ", simulationStepIndex=" + simulationStepIndex +
+                ", tetrionIndex=" + tetrionIndex +
+                '}';
+    }
 }
