@@ -9,12 +9,11 @@
 
 #include <core/helper/types.hpp>
 
-
 // oopetris specific names
 
 #define JAVA_OOPETRIS_CLASS_NAME "com/github/oopetris"
 
-#define JAVA_CLASS(name) JAVA_OOPETRIS_CLASS_NAME "/" name
+#define JAVA_OOPETRIS_CLASS(name) JAVA_OOPETRIS_CLASS_NAME "/" name
 
 // helper
 
@@ -22,9 +21,10 @@
 
 #define CONSTRUCTOR_TYPE(types) METHOD_TYPE(types, "V")
 
-#define TYPE_FOR_CLASS(name) "L" JAVA_CLASS(name)
+#define TYPE_FOR_CLASS(name) "L" name ";"
 
-#define METHOD_DECL_SEPERATOR "["
+// no seperator
+#define METHOD_DECL_SEPERATOR ""
 
 // base names
 
@@ -36,9 +36,16 @@
 
 // literal types
 
-#define BYTE_LITERAL_TYPE "b"
-#define INTEGER_LITERAL_TYPE "i"
-#define LONG_LITERAL_TYPE "l"
+// type docs: https://docs.oracle.com/en/java/javase/21/docs/specs/jni/types.html
+
+#define BOOLEAN_LITERAL_TYPE "Z"
+#define BYTE_LITERAL_TYPE "B"
+#define CHAR_LITERAL_TYPE "C"
+#define SHORT_LITERAL_TYPE "S"
+#define INTEGER_LITERAL_TYPE "I"
+#define LONG_LITERAL_TYPE "J"
+#define FLOAT_LITERAL_TYPE "F"
+#define DOUBLE_LITERAL_TYPE "D"
 
 // JOOU types
 

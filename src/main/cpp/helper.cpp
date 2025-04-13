@@ -5,6 +5,8 @@
 #include <iostream>
 
 
+//JNI DOCS: https://docs.oracle.com/en/java/javase/21/docs/specs/jni/functions.html
+
 std::string JNI_jstring_to_string(JNIEnv* env, jstring j_str) {
     if (!j_str) {
         return "";
@@ -64,7 +66,7 @@ get_method_for_class(JNIEnv* env, std::string class_name, std::string method_nam
 jobject construct_u8(JNIEnv* env, u8 value) {
 
     const auto [u8_class, u8_construct_function] =
-            get_method_for_class(env, U8_JAVA_CLASS, "valueOf", METHOD_TYPE(BYTE_LITERAL_TYPE, U8_JAVA_CLASS));
+            get_method_for_class(env, U8_JAVA_CLASS, "valueOf", METHOD_TYPE(BYTE_LITERAL_TYPE, U8_JAVA_TYPE));
 
     auto u8_value = static_cast<jbyte>(value);
 
@@ -84,7 +86,7 @@ jobject construct_u8(JNIEnv* env, u8 value) {
 jobject construct_u32(JNIEnv* env, u32 value) {
 
     const auto [u32_class, u32_construct_function] =
-            get_method_for_class(env, U32_JAVA_CLASS, "valueOf", METHOD_TYPE(INTEGER_LITERAL_TYPE, U32_JAVA_CLASS));
+            get_method_for_class(env, U32_JAVA_CLASS, "valueOf", METHOD_TYPE(INTEGER_LITERAL_TYPE, U32_JAVA_TYPE));
 
     auto u32_value = static_cast<jint>(value);
 
@@ -104,7 +106,7 @@ jobject construct_u32(JNIEnv* env, u32 value) {
 jobject construct_u64(JNIEnv* env, u64 value) {
 
     const auto [u64_class, u64_construct_function] =
-            get_method_for_class(env, U64_JAVA_CLASS, "valueOf", METHOD_TYPE(LONG_LITERAL_TYPE, U64_JAVA_CLASS));
+            get_method_for_class(env, U64_JAVA_CLASS, "valueOf", METHOD_TYPE(LONG_LITERAL_TYPE, U64_JAVA_TYPE));
 
     auto u64_value = static_cast<jlong>(value);
 
@@ -171,12 +173,3 @@ void JNI_throw_java_exception(JNIEnv* env, std::string class_name, std::string m
 
 
 JavaExceptionAlreadyThrown::JavaExceptionAlreadyThrown() : std::runtime_error{ "JavaExceptionAlreadyThrown" } { }
-
-
-// https://docs.oracle.com/en/java/javase/21/docs/specs/jni/functions.html#exceptions
-// https://www.baeldung.com/jni
-// https://github.com/gkubisa/jni-maven/blob/master/pom.xml
-// https://junit.org/junit4/javadoc/4.13/org/junit/Assert.html
-// https://stackoverflow.com/questions/44636567/android-jni-call-java-constructor-in-c
-// https://stackoverflow.com/questions/230689/best-way-to-throw-exceptions-in-jni-code
-// https://programming.guide/java/list-of-java-exceptions.html
