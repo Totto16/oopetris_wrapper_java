@@ -1,0 +1,13 @@
+option(
+    'clang_libcpp',
+    type: 'feature',
+    value: 'auto',
+    description: 'if using clang, build with libc++ instead of libstdc++ (gcc stdlib)',
+)
+
+option(
+    'version_range_for_java',
+    type: 'string',
+    value: '>=17',
+    description: 'set java version constraints',
+)
