@@ -24,16 +24,16 @@ public class RecordingsTest {
 
     protected String getFilePathAsStr(String name) {
         ClassLoader classLoader = getClass().getClassLoader();
-        URL other_resource = classLoader.getResource("correct.rec");
+        URL otherResource = classLoader.getResource("correct.rec");
 
-        if (other_resource == null) {
+        if (otherResource == null) {
             throw new IllegalStateException("getFilePathAsStr Implementation error");
         }
-        File other_file = new File(other_resource.getFile());
+        File otherFile = new File(otherResource.getFile());
 
-        File resources_folder = other_file.getParentFile();
+        File resourcesFolder = otherFile.getParentFile();
 
-        return resources_folder.getAbsolutePath() + File.separator + name;
+        return resourcesFolder.getAbsolutePath() + File.separator + name;
     }
 
     protected boolean fileExists(File file) {
@@ -97,7 +97,7 @@ public class RecordingsTest {
 
 
             Throwable exception = assertThrows(NullPointerException.class, () -> {
-                RecordingInformation _information = Recordings.getInformation(file);
+                Recordings.getInformation(file);
             }, "should raise an error for non existent file");
 
             assertTrue(exception.getMessage().matches("^File was null$"));
@@ -112,7 +112,7 @@ public class RecordingsTest {
 
 
             Throwable exception = assertThrows(FileNotFoundException.class, () -> {
-                RecordingInformation _information = Recordings.getInformation(file);
+                Recordings.getInformation(file);
             }, "should raise an error for non existent file");
 
             assertTrue(exception.getMessage().matches("^File '.*NON-EXISTENT.rec' not found!$"));
@@ -127,7 +127,7 @@ public class RecordingsTest {
 
 
             Throwable exception = assertThrows(RuntimeException.class, () -> {
-                RecordingInformation _information = Recordings.getInformation(file);
+                Recordings.getInformation(file);
             }, "should raise an error for incorrect file");
 
             assertTrue(exception.getMessage().matches(
@@ -156,7 +156,6 @@ public class RecordingsTest {
 
             assertTrue(fileExists(file));
 
-
             RecordingInformation information = Recordings.getInformation(file);
 
             RecordingInformation correctRecordings = Correct.getCorrectRecordings();
@@ -171,7 +170,7 @@ public class RecordingsTest {
 
         @Test
         void getProperties() {
-            RecordingProperties expectedProperties = new RecordingProperties(new GridProperties(ubyte(20), ubyte(20)));
+            RecordingProperties expectedProperties = new RecordingProperties(new GridProperties(ubyte(20), ubyte(10)));
 
             RecordingProperties actualProperties = Recordings.getProperties();
 
