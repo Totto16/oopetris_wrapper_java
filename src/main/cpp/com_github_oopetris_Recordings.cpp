@@ -17,7 +17,7 @@
 #define JAVA_EXCEPTION_GUARD_END(error_return_value)                           \
     }                                                                          \
     catch (const JavaException& exception) {                                   \
-        exception.throw_java_exception(env);                                      \
+        exception.throw_java_exception(env);                                   \
         return error_return_value;                                             \
     }                                                                          \
     catch (const JavaExceptionAlreadyThrown& _) {                              \
