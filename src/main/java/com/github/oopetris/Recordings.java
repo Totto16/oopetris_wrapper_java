@@ -4,27 +4,33 @@ import java.io.File;
 
 public class Recordings {
 
-	private Recordings() {
-        
-	}
+    private Recordings() { }
 
-	static {
-		System.loadLibrary("oopetris_recordings_java_native");
-	}
+    static {
+        System.loadLibrary("oopetris_java_wrapper_native");
+    }
 
-	public static native boolean isRecordingFile(String path);
+    public static native boolean isRecordingFile(String path);
 
-	public static native RecordingInformation getInformation(String path);
+    public static native RecordingInformation getInformation(String path);
 
-	public static boolean isRecordingFile(File file) {
-		return isRecordingFile(file.getAbsolutePath());
-	}
+    public static boolean isRecordingFile(File file) {
+        if (file == null) {
+            return false;
+        }
 
-	public static RecordingInformation getInformation(File file) {
-		return getInformation(file.getAbsolutePath());
-	}
+        return isRecordingFile(file.getAbsolutePath());
+    }
 
-	public static native RecordingProperties getProperties();
+    public static RecordingInformation getInformation(File file) {
+        if (file == null) {
+            throw new NullPointerException("File was null");
+        }
 
-	public static native String getVersion();
+        return getInformation(file.getAbsolutePath());
+    }
+
+    public static native RecordingProperties getProperties();
+
+    public static native String getVersion();
 }
