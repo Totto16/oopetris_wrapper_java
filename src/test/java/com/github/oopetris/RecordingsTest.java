@@ -1,5 +1,6 @@
 package com.github.oopetris;
 
+import static org.joou.Unsigned.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Nested;
@@ -160,7 +161,30 @@ public class RecordingsTest {
 
             RecordingInformation correctRecordings = Correct.getCorrectRecordings();
 
-            assertEquals(correctRecordings , information);
+            assertEquals(correctRecordings, information);
+        }
+    }
+
+    @Nested
+    class OtherTests {
+
+
+        @Test
+        void getProperties() {
+            RecordingProperties expectedProperties = new RecordingProperties(new GridProperties(ubyte(20), ubyte(20)));
+
+            RecordingProperties actualProperties = Recordings.getProperties();
+
+            assertEquals(expectedProperties, actualProperties);
+        }
+
+        @Test
+        void getVersion() {
+            String expectedVersion = "0.5.6";
+
+            String actualVersion = Recordings.getVersion();
+
+            assertEquals(expectedVersion, actualVersion);
         }
     }
 }
