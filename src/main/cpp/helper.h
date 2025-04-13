@@ -23,6 +23,8 @@
 
 #define TYPE_FOR_CLASS(name) "L" name ";"
 
+#define JAVA_CONSTRUCTOR_NAME "<init>"
+
 // no seperator
 #define METHOD_DECL_SEPERATOR ""
 
@@ -84,6 +86,9 @@ get_constructor_for_class(JNIEnv* env, std::string class_name, std::string const
 
 std::pair<jclass, jmethodID>
 get_method_for_class(JNIEnv* env, std::string class_name, std::string method_name, std::string method_signature);
+
+std::pair<jclass, jmethodID>
+get_static_method_for_class(JNIEnv* env, std::string class_name, std::string method_name, std::string method_signature);
 
 jobject construct_u8(JNIEnv* env, u8 value);
 

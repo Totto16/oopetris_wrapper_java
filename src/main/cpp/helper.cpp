@@ -29,7 +29,7 @@ std::string JNI_jstring_to_string(JNIEnv* env, jstring j_str) {
 std::pair<jclass, jmethodID>
 get_constructor_for_class(JNIEnv* env, std::string class_name, std::string constructor_signature) {
 
-    return get_method_for_class(env, class_name, "<init>", constructor_signature);
+    return get_method_for_class(env, class_name, JAVA_CONSTRUCTOR_NAME, constructor_signature);
 }
 
 std::pair<jclass, jmethodID>
@@ -46,9 +46,9 @@ get_method_for_class(JNIEnv* env, std::string class_name, std::string method_nam
     }
 
 
-    jmethodID found_constructor = env->GetMethodID(found_class, method_name.c_str(), method_signature.c_str());
+    jmethodID found_method = env->GetMethodID(found_class, method_name.c_str(), method_signature.c_str());
 
-    if (found_constructor == nullptr) {
+    if (found_method == nullptr) {
         throw JavaException(
                 NoSuchMethodError, "No method with the name '" + method_name + "' and signature '" + method_signature
                                            + "' found for the class: " + class_name
@@ -59,18 +59,53 @@ get_method_for_class(JNIEnv* env, std::string class_name, std::string method_nam
         throw JavaExceptionAlreadyThrown();
     }
 
-    return std::make_pair(found_class, found_constructor);
+    return std::make_pair(found_class, found_method);
+}
+
+
+std::pair<jclass, jmethodID> get_static_method_for_class(
+        JNIEnv* env,
+        std::string class_name,
+        std::string method_name,
+        std::string method_signature
+) {
+
+    jclass found_class = env->FindClass(class_name.c_str());
+
+    if (found_class == nullptr) {
+        throw JavaException(NoClassDefFoundError, "No class with the name '" + class_name + "' found");
+    }
+
+    if (env->ExceptionOccurred() != nullptr) {
+        throw JavaExceptionAlreadyThrown();
+    }
+
+
+    jmethodID found_method = env->GetStaticMethodID(found_class, method_name.c_str(), method_signature.c_str());
+
+    if (found_method == nullptr) {
+        throw JavaException(
+                NoSuchMethodError, "No static method with the name '" + method_name + "' and signature '"
+                                           + method_signature + "' found for the class: " + class_name
+        );
+    }
+
+    if (env->ExceptionOccurred() != nullptr) {
+        throw JavaExceptionAlreadyThrown();
+    }
+
+    return std::make_pair(found_class, found_method);
 }
 
 
 jobject construct_u8(JNIEnv* env, u8 value) {
 
-    const auto [u8_class, u8_construct_function] =
-            get_method_for_class(env, U8_JAVA_CLASS, "valueOf", METHOD_TYPE(BYTE_LITERAL_TYPE, U8_JAVA_TYPE));
+    const auto [u8_class, u8_static_create_function] =
+            get_static_method_for_class(env, U8_JAVA_CLASS, "valueOf", METHOD_TYPE(BYTE_LITERAL_TYPE, U8_JAVA_TYPE));
 
     auto u8_value = static_cast<jbyte>(value);
 
-    jobject u8_object = env->NewObject(u8_class, u8_construct_function, u8_value);
+    jobject u8_object = env->CallStaticObjectMethod(u8_class, u8_static_create_function, u8_value);
 
     if (u8_object == nullptr) {
         throw JavaException(ExceptionInInitializerError, "Could not construct u8");
@@ -85,12 +120,13 @@ jobject construct_u8(JNIEnv* env, u8 value) {
 
 jobject construct_u32(JNIEnv* env, u32 value) {
 
-    const auto [u32_class, u32_construct_function] =
-            get_method_for_class(env, U32_JAVA_CLASS, "valueOf", METHOD_TYPE(INTEGER_LITERAL_TYPE, U32_JAVA_TYPE));
+    const auto [u32_class, u32_static_create_function] = get_static_method_for_class(
+            env, U32_JAVA_CLASS, "valueOf", METHOD_TYPE(INTEGER_LITERAL_TYPE, U32_JAVA_TYPE)
+    );
 
     auto u32_value = static_cast<jint>(value);
 
-    jobject u32_object = env->NewObject(u32_class, u32_construct_function, u32_value);
+    jobject u32_object = env->CallStaticObjectMethod(u32_class, u32_static_create_function, u32_value);
 
     if (u32_object == nullptr) {
         throw JavaException(ExceptionInInitializerError, "Could not construct u32");
@@ -105,12 +141,12 @@ jobject construct_u32(JNIEnv* env, u32 value) {
 
 jobject construct_u64(JNIEnv* env, u64 value) {
 
-    const auto [u64_class, u64_construct_function] =
-            get_method_for_class(env, U64_JAVA_CLASS, "valueOf", METHOD_TYPE(LONG_LITERAL_TYPE, U64_JAVA_TYPE));
+    const auto [u64_class, u64_static_create_function] =
+            get_static_method_for_class(env, U64_JAVA_CLASS, "valueOf", METHOD_TYPE(LONG_LITERAL_TYPE, U64_JAVA_TYPE));
 
     auto u64_value = static_cast<jlong>(value);
 
-    jobject u64_object = env->NewObject(u64_class, u64_construct_function, u64_value);
+    jobject u64_object = env->CallStaticObjectMethod(u64_class, u64_static_create_function, u64_value);
 
     if (u64_object == nullptr) {
         throw JavaException(ExceptionInInitializerError, "Could not construct u64");
