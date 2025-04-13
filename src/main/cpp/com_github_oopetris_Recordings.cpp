@@ -11,32 +11,49 @@
 #include <filesystem>
 #include <string>
 
+#define JAVA_EXCEPTION_GUARD_START() try {
 
-static jboolean is_recording_file(JNIEnv* env, jstring jpath) {
 
+#define JAVA_EXCEPTION_GUARD_END(error_return_value)                           \
+    }                                                                          \
+    catch (const JavaException& exception) {                                   \
+        exception.throw_java_exception(env);                                      \
+        return error_return_value;                                             \
+    }                                                                          \
+    catch (const JavaExceptionAlreadyThrown& _) {                              \
+        return error_return_value;                                             \
+    }                                                                          \
+    catch (const std::runtime_error& raw_exception) {                          \
+        JNI_throw_java_exception(env, RuntimeException, raw_exception.what()); \
+        return error_return_value;                                             \
+    }
+
+
+static jboolean _cpp_impl_is_recording_file(JNIEnv* env, jstring jpath) {
+    JAVA_EXCEPTION_GUARD_START()
 
     std::string path = JNI_jstring_to_string(env, jpath);
 
 
     if (not std::filesystem::exists(path)) {
-
         return JNI_FALSE;
     }
 
     auto parsed = recorder::RecordingReader::from_path(path);
 
     return parsed.has_value() ? JNI_TRUE : JNI_FALSE;
-    ;
+
+    JAVA_EXCEPTION_GUARD_END(JNI_FALSE)
 }
 
 
-static jobject get_information(JNIEnv* env, jstring jpath) {
+static jobject _cpp_impl_get_information(JNIEnv* env, jstring jpath) {
+    JAVA_EXCEPTION_GUARD_START()
 
     std::string path = JNI_jstring_to_string(env, jpath);
 
-
     if (not std::filesystem::exists(path)) {
-        //TODO throw exception in java
+        throw JavaException(FileNotFoundException, "File '" + path + "' not found!");
     }
 
     auto parsed = recorder::RecordingReader::from_path(path);
@@ -57,14 +74,21 @@ static jobject get_information(JNIEnv* env, jstring jpath) {
     jobject val = recording_reader_to_java(env, recording_reader);
 
     return val;
+
+    JAVA_EXCEPTION_GUARD_END(nullptr)
 }
 
 
-static jobject get_properties(JNIEnv* env) {
+static jobject _cpp_impl_get_properties(JNIEnv* env) {
+    JAVA_EXCEPTION_GUARD_START()
+
     return properties_to_java(env);
+
+    JAVA_EXCEPTION_GUARD_END(nullptr)
 }
 
-static jstring get_version(JNIEnv* env) {
+static jstring _cpp_impl_get_version(JNIEnv* env) {
+    JAVA_EXCEPTION_GUARD_START()
 
     const std::string str = utils::version();
 
@@ -75,6 +99,8 @@ static jstring get_version(JNIEnv* env) {
     }
 
     return jversion;
+
+    JAVA_EXCEPTION_GUARD_END(nullptr)
 }
 
 #ifdef __cplusplus
@@ -83,21 +109,21 @@ extern "C" {
 
 
 JNIEXPORT jboolean JNICALL Java_com_github_oopetris_Recordings_isRecordingFile(JNIEnv* env, jclass, jstring jpath) {
-    return is_recording_file(env, jpath);
+    return _cpp_impl_is_recording_file(env, jpath);
 }
 
 JNIEXPORT jobject JNICALL Java_com_github_oopetris_Recordings_getInformation(JNIEnv* env, jclass, jstring jpath) {
-    return get_information(env, jpath);
+    return _cpp_impl_get_information(env, jpath);
 }
 
 
 JNIEXPORT jobject JNICALL Java_com_github_oopetris_Recordings_getProperties(JNIEnv* env, jclass) {
-    return get_properties(env);
+    return _cpp_impl_get_properties(env);
 }
 
 
 JNIEXPORT jstring JNICALL Java_com_github_oopetris_Recordings_getVersion(JNIEnv* env, jclass) {
-    return get_version(env);
+    return _cpp_impl_get_version(env);
 }
 
 

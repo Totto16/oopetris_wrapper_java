@@ -7,12 +7,9 @@
 
 jobject recording_reader_to_java(JNIEnv* env, const recorder::RecordingReader& reader) {
 
-    //TODO
-
     (void) env;
     (void) reader;
-
-    return nullptr;
+    throw JavaException(RuntimeException, "Not Implemented: recording_reader_to_java");
 }
 
 jobject properties_to_java(JNIEnv* env) {

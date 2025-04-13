@@ -2,6 +2,8 @@
 
 #include "./helper.h"
 
+#include <iostream>
+
 
 std::string JNI_jstring_to_string(JNIEnv* env, jstring j_str) {
     if (!j_str) {
@@ -21,37 +23,6 @@ std::string JNI_jstring_to_string(JNIEnv* env, jstring j_str) {
     return str;
 }
 
-
-std::unique_ptr<std::pair<jclass, jmethodID>> get_constructor_for_class_without_execxption(
-        JNIEnv* env,
-        std::string class_name,
-        std::string constructor_signature
-) noexcept {
-
-    jclass found_class = env->FindClass(class_name.c_str());
-
-    if (found_class == nullptr) {
-        return nullptr;
-    }
-
-    if (env->ExceptionOccurred() != nullptr) {
-        return nullptr;
-    }
-
-
-    jmethodID found_constructor = env->GetMethodID(found_class, "<init>", constructor_signature.c_str());
-
-    if (found_constructor == nullptr) {
-        return nullptr;
-    }
-
-    if (env->ExceptionOccurred() != nullptr) {
-        return nullptr;
-    }
-
-
-    return std::make_unique<std::pair<jclass, jmethodID>>(found_class, found_constructor);
-}
 
 std::pair<jclass, jmethodID>
 get_constructor_for_class(JNIEnv* env, std::string class_name, std::string constructor_signature) {
@@ -162,9 +133,40 @@ JavaException::JavaException(std::string class_name, std::string message)
       m_message{ message } { }
 
 void JavaException::throw_java_exception(JNIEnv* env) const {
+    JNI_throw_java_exception(env, this->m_class_name, this->m_message);
+}
 
-    //TODO
-    (void) env;
+static void
+JNI_throw_java_exception_impl(JNIEnv* env, std::string class_name, std::string message, bool fatal_on_error) {
+
+
+    jclass found_class = env->FindClass(class_name.c_str());
+
+    if (found_class == nullptr || env->ExceptionOccurred() != nullptr) {
+        if (fatal_on_error) {
+            std::cerr << "FATAL: Couldn't find class '" << class_name << "' to throw a native Java exception!\n";
+            return;
+        }
+
+        JNI_throw_java_exception_impl(env, RuntimeException, message, true);
+        return;
+    }
+
+
+    jint result = env->ThrowNew(found_class, message.c_str());
+    if (result != JNI_OK) {
+        if (fatal_on_error) {
+            std::cerr << "FATAL: Couldn't throw a native Java exception: ThrowNew failed with code" << result << "\n";
+            return;
+        }
+
+        JNI_throw_java_exception_impl(env, RuntimeException, message, true);
+        return;
+    }
+}
+
+void JNI_throw_java_exception(JNIEnv* env, std::string class_name, std::string message) {
+    JNI_throw_java_exception_impl(env, class_name, message, false);
 }
 
 

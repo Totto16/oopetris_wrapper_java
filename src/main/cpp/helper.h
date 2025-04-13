@@ -30,6 +30,8 @@
 
 #define JAVA_LANG_BASE_PACKAGE "java/lang"
 
+#define JAVA_IO_BASE_PACKAGE "java/io"
+
 #define JOOU_BASE_PACKAGE "org/joou"
 
 // literal types
@@ -63,15 +65,12 @@
 
 #define RuntimeException JAVA_LANG_BASE_PACKAGE "/RuntimeException"
 
+#define FileNotFoundException JAVA_IO_BASE_PACKAGE "/FileNotFoundException"
+
+
 // functions
 
 std::string JNI_jstring_to_string(JNIEnv* env, jstring j_str);
-
-std::unique_ptr<std::pair<jclass, jmethodID>> get_constructor_for_class_without_execxption(
-        JNIEnv* env,
-        std::string class_name,
-        std::string constructor_signature
-) noexcept;
 
 std::pair<jclass, jmethodID>
 get_constructor_for_class(JNIEnv* env, std::string class_name, std::string constructor_signature);
@@ -96,6 +95,8 @@ public:
 
     void throw_java_exception(JNIEnv* env) const;
 };
+
+void JNI_throw_java_exception(JNIEnv* env, std::string class_name, std::string message);
 
 
 class JavaExceptionAlreadyThrown : std::runtime_error {
