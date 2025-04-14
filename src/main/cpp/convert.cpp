@@ -320,6 +320,22 @@ static jobject snapshots_to_java(JNIEnv* env, const std::vector<TetrionSnapshot>
     return list.get_result();
 }
 
+struct JRecordingInformation {
+
+    static constexpr const char* java_class = JAVA_OOPETRIS_CLASS("RecordingInformation");
+    static constexpr const char* java_type = TYPE_FOR_CLASS(JAVA_OOPETRIS_CLASS("RecordingInformation"));
+
+    using native_type = jobject;
+
+
+    using constructor = struct {
+        using inner = std::tuple<JMapDescription, JListDescription, JListDescription, JListDescription, JU8Description>;
+    };
+};
+
+static_assert(IsJavaTypeDescriptionForObject<JRecordingInformation>);
+static_assert(JavaDescriptionHasConstructorType<JRecordingInformation>);
+
 
 jobject recording_reader_to_java(JNIEnv* env, const recorder::RecordingReader& reader) {
 
@@ -342,31 +358,46 @@ jobject recording_reader_to_java(JNIEnv* env, const recorder::RecordingReader& r
 
     // call the correct constructor
 
-    const auto [recording_information_class, recording_information_constructor] = get_constructor_for_class(
-            env, JAVA_OOPETRIS_CLASS("RecordingInformation"),
-            CONSTRUCTOR_TYPE(TYPE_FOR_CLASS(JAVA_MAP_CLASS) METHOD_DECL_SEPERATOR TYPE_FOR_CLASS(JAVA_LIST_CLASS)
-                                     METHOD_DECL_SEPERATOR TYPE_FOR_CLASS(JAVA_LIST_CLASS)
-                                             METHOD_DECL_SEPERATOR TYPE_FOR_CLASS(JAVA_LIST_CLASS)
-                                                     METHOD_DECL_SEPERATOR U8_JAVA_TYPE)
+    const auto [_, recording_information] = construct_new_java_object<JRecordingInformation>(
+            env, jinformation, jrecords, jsnapshots, jtetrion_headers, jversion
     );
-
-    jobject recording_information = env->NewObject(
-            recording_information_class, recording_information_constructor, jinformation, jrecords, jsnapshots,
-            jtetrion_headers, jversion
-    );
-
-
-    if (recording_information == nullptr) {
-        throw JavaException(ExceptionInInitializerError, "Could not construct 'RecordingInformation'");
-    }
-
-    if (env->ExceptionOccurred() != nullptr) {
-        throw JavaExceptionAlreadyThrown();
-    }
 
 
     return recording_information;
 }
+
+
+struct JGridProperties {
+
+    static constexpr const char* java_class = JAVA_OOPETRIS_CLASS("GridProperties");
+    static constexpr const char* java_type = TYPE_FOR_CLASS(JAVA_OOPETRIS_CLASS("GridProperties"));
+
+    using native_type = jobject;
+
+    using constructor = struct {
+        using inner = std::tuple<JU8Description, JU8Description>;
+    };
+};
+
+static_assert(IsJavaTypeDescriptionForObject<JGridProperties>);
+static_assert(JavaDescriptionHasConstructorType<JGridProperties>);
+
+
+struct JRecordingProperties {
+
+    static constexpr const char* java_class = JAVA_OOPETRIS_CLASS("RecordingProperties");
+    static constexpr const char* java_type = TYPE_FOR_CLASS(JAVA_OOPETRIS_CLASS("RecordingProperties"));
+
+    using native_type = jobject;
+
+    using constructor = struct {
+        using inner = std::tuple<JGridProperties>;
+    };
+};
+
+static_assert(IsJavaTypeDescriptionForObject<JRecordingProperties>);
+static_assert(JavaDescriptionHasConstructorType<JRecordingProperties>);
+
 
 jobject properties_to_java(JNIEnv* env) {
 
@@ -374,39 +405,9 @@ jobject properties_to_java(JNIEnv* env) {
 
     jobject jwidth = construct_u8(env, grid::width_in_tiles);
 
-    const auto [grid_properties_class, grid_properties_constructor] = get_constructor_for_class(
-            env, JAVA_OOPETRIS_CLASS("GridProperties"),
-            CONSTRUCTOR_TYPE(U8_JAVA_TYPE METHOD_DECL_SEPERATOR U8_JAVA_TYPE)
-    );
+    const auto [_, grid_properties] = construct_new_java_object<JGridProperties>(env, jheight, jwidth);
 
-    jobject grid_properties = env->NewObject(grid_properties_class, grid_properties_constructor, jheight, jwidth);
-
-    if (grid_properties == nullptr) {
-        throw JavaException(ExceptionInInitializerError, "Could not construct 'GridProperties'");
-    }
-
-    if (env->ExceptionOccurred() != nullptr) {
-        throw JavaExceptionAlreadyThrown();
-    }
-
-
-    const auto [recording_properties_class, recording_properties_constructor] = get_constructor_for_class(
-            env, JAVA_OOPETRIS_CLASS("RecordingProperties"),
-            CONSTRUCTOR_TYPE(TYPE_FOR_CLASS(JAVA_OOPETRIS_CLASS("GridProperties")))
-    );
-
-    jobject recording_properties =
-            env->NewObject(recording_properties_class, recording_properties_constructor, grid_properties);
-
-
-    if (recording_properties == nullptr) {
-        throw JavaException(ExceptionInInitializerError, "Could not construct 'RecordingProperties'");
-    }
-
-    if (env->ExceptionOccurred() != nullptr) {
-        throw JavaExceptionAlreadyThrown();
-    }
-
+    const auto [_2, recording_properties] = construct_new_java_object<JRecordingProperties>(env, grid_properties);
 
     return recording_properties;
 }

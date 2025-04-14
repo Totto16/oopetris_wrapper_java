@@ -150,20 +150,39 @@ public:
 
 // conecpts and templates
 
+namespace details {
+
+
+    template<typename T>
+    concept HasJavaClass = requires(T) {
+        { T::java_class } -> std::convertible_to<const char*>;
+    };
+
+    template<typename T>
+    concept IsJavaLiteralTypeDescription = requires(T) {
+        { T::java_type } -> std::convertible_to<const char*>;
+        typename T::native_type;
+        not std::is_same_v<typename T::native_type, jobject>;
+    } and not HasJavaClass<T>;
+
+
+    template<typename T>
+    concept IsJavaClassTypeDescription = requires(T) {
+        { T::java_type } -> std::convertible_to<const char*>;
+        typename T::native_type;
+        std::is_same_v<typename T::native_type, jobject>;
+    } and HasJavaClass<T>;
+
+
+} // namespace details
+
+
 template<typename T>
-concept IsJavaTypeDescription = requires(T) {
-    { T::java_type } -> std::convertible_to<const char*>;
-    typename T::native_type;
-};
+concept IsJavaTypeDescription = details::IsJavaLiteralTypeDescription<T> || details::IsJavaClassTypeDescription<T>;
+
 
 static_assert(not IsJavaTypeDescription<bool>);
 
-template<typename T>
-concept IsJavaClassDescription = IsJavaTypeDescription<T> && requires(T) {
-    { T::java_class } -> std::convertible_to<const char*>;
-};
-
-static_assert(not IsJavaClassDescription<bool>);
 
 template<typename T>
 concept IsJavaTypeDescriptionForObject =
@@ -269,7 +288,6 @@ namespace details {
 
 
     template<typename C>
-        requires IsJavaConstructor<C>
     struct CWrapper {
         using constructor = C;
     };
@@ -313,8 +331,30 @@ std::pair<jclass, typename T::native_type> construct_new_java_object(JNIEnv* env
 }
 
 
+// basic java type descriptions
+
+struct JIntDescription {
+    static constexpr const char* java_type = INTEGER_LITERAL_TYPE;
+    using native_type = jint;
+};
+
+static_assert(IsJavaTypeDescription<JIntDescription>);
+
+struct JU8Description {
+
+    static constexpr const char* java_class = U8_JAVA_CLASS;
+    static constexpr const char* java_type = U8_JAVA_TYPE;
+
+    using native_type = jobject;
+};
+
+static_assert(IsJavaTypeDescriptionForObject<JU8Description>);
+
+
+// list specific stuff
+
 template<typename T>
-concept IsJavaListImpl = IsJavaClassDescription<T> && requires(T) {
+concept IsJavaListImpl = IsJavaTypeDescriptionForObject<T> && requires(T) {
     { T::has_initial_capacity_constructor } -> std::convertible_to<bool>;
 };
 
@@ -339,18 +379,22 @@ struct ListConstructorEmpty {
 
 static_assert(IsJavaConstructor<ListConstructorEmpty>);
 
-struct JIntDescription {
-    static constexpr const char* java_type = INTEGER_LITERAL_TYPE;
-    using native_type = jint;
-};
-
-static_assert(IsJavaTypeDescription<JIntDescription>);
 
 struct ListConstructorWithCapacity {
     using inner = std::tuple<JIntDescription>;
 };
 
 static_assert(IsJavaConstructor<ListConstructorWithCapacity>);
+
+struct JListDescription {
+    static constexpr const char* java_class = JAVA_LIST_CLASS;
+    static constexpr const char* java_type = TYPE_FOR_CLASS(JAVA_LIST_CLASS);
+
+    using native_type = jobject;
+};
+
+static_assert(IsJavaTypeDescription<JListDescription>);
+
 
 // see https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html
 template<typename ListImpl, typename T>
@@ -407,3 +451,13 @@ public:
 template<typename T>
     requires IsJavaTypeDescription<T>
 using JArrayList = JList<ArrayListImpl, T>;
+
+
+struct JMapDescription {
+    static constexpr const char* java_class = JAVA_MAP_CLASS;
+    static constexpr const char* java_type = TYPE_FOR_CLASS(JAVA_MAP_CLASS);
+
+    using native_type = jobject;
+};
+
+static_assert(IsJavaTypeDescription<JMapDescription>);
