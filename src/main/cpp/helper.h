@@ -148,9 +148,9 @@ concept IsJavaTypeDescription = requires(T) {
 static_assert(not IsJavaTypeDescription<bool>);
 
 template<typename T>
-concept IsJavaObject = IsJavaTypeDescription<T> && requires(T) { std::is_same_v<typename T::native_type, jobject>; };
+concept IsJavaTypeDescriptionForObject = IsJavaTypeDescription<T> && requires(T) { std::is_same_v<typename T::native_type, jobject>; };
 
-static_assert(not IsJavaObject<bool>);
+static_assert(not IsJavaTypeDescriptionForObject<bool>);
 
 template<typename T>
 concept IsJavaListImpl = IsJavaTypeDescription<T> && requires(T) {
@@ -173,7 +173,7 @@ static_assert(IsJavaListImpl<ArrayListImpl>);
 
 // see https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html
 template<typename ListImpl, typename T>
-    requires IsJavaListImpl<ListImpl> && IsJavaTypeDescription<T> && IsJavaObject<T>
+    requires IsJavaListImpl<ListImpl> && IsJavaTypeDescriptionForObject<T>
 class JList {
 private:
     jobject m_instance;
@@ -234,12 +234,15 @@ public:
 
         jboolean result = env->CallBooleanMethod(m_instance, list_add_function, elem);
 
-
         if (env->ExceptionOccurred() != nullptr) {
             throw JavaExceptionAlreadyThrown();
         }
 
         return result;
+    }
+
+    [[nodiscard]] jobject get_result() const {
+        return m_instance;
     }
 };
 
