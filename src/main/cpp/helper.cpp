@@ -55,6 +55,26 @@ get_constructor_for_class(JNIEnv* env, std::string class_name, std::string const
     return get_method_for_class(env, class_name, JAVA_CONSTRUCTOR_NAME, constructor_signature);
 }
 
+[[nodiscard]] std::pair<jclass, jmethodID>
+get_method_for_class(JNIEnv* env, jclass clazz, std::string method_name, std::string method_signature) {
+
+
+    jmethodID found_method = env->GetMethodID(clazz, method_name.c_str(), method_signature.c_str());
+
+    if (found_method == nullptr) {
+        throw JavaException(
+                NoSuchMethodError,
+                "No method with the name '" + method_name + "' and signature '" + method_signature + "' found!"
+        );
+    }
+
+    if (env->ExceptionOccurred() != nullptr) {
+        throw JavaExceptionAlreadyThrown();
+    }
+
+    return std::make_pair(clazz, found_method);
+}
+
 std::pair<jclass, jmethodID>
 get_method_for_class(JNIEnv* env, std::string class_name, std::string method_name, std::string method_signature) {
 
@@ -68,21 +88,7 @@ get_method_for_class(JNIEnv* env, std::string class_name, std::string method_nam
         throw JavaExceptionAlreadyThrown();
     }
 
-
-    jmethodID found_method = env->GetMethodID(found_class, method_name.c_str(), method_signature.c_str());
-
-    if (found_method == nullptr) {
-        throw JavaException(
-                NoSuchMethodError, "No method with the name '" + method_name + "' and signature '" + method_signature
-                                           + "' found for the class: " + class_name
-        );
-    }
-
-    if (env->ExceptionOccurred() != nullptr) {
-        throw JavaExceptionAlreadyThrown();
-    }
-
-    return std::make_pair(found_class, found_method);
+    return get_method_for_class(env, found_class, method_name, method_signature);
 }
 
 

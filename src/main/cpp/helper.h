@@ -93,7 +93,7 @@
 
 // functions
 
-std::string JNI_jstring_to_string(JNIEnv* env, jstring j_str);
+[[nodiscard]] std::string JNI_jstring_to_string(JNIEnv* env, jstring j_str);
 
 [[nodiscard]] jstring JNI_get_jstring(JNIEnv* env, std::string str);
 
@@ -102,17 +102,21 @@ std::string JNI_jstring_to_string(JNIEnv* env, jstring j_str);
 [[nodiscard]] std::pair<jclass, jmethodID>
 get_constructor_for_class(JNIEnv* env, std::string class_name, std::string constructor_signature);
 
-std::pair<jclass, jmethodID>
+[[nodiscard]] std::pair<jclass, jmethodID>
+get_method_for_class(JNIEnv* env, jclass clazz, std::string method_name, std::string method_signature);
+
+[[nodiscard]] std::pair<jclass, jmethodID>
 get_method_for_class(JNIEnv* env, std::string class_name, std::string method_name, std::string method_signature);
 
-std::pair<jclass, jmethodID>
+
+[[nodiscard]] std::pair<jclass, jmethodID>
 get_static_method_for_class(JNIEnv* env, std::string class_name, std::string method_name, std::string method_signature);
 
-jobject construct_u8(JNIEnv* env, u8 value);
+[[nodiscard]] jobject construct_u8(JNIEnv* env, u8 value);
 
-jobject construct_u32(JNIEnv* env, u32 value);
+[[nodiscard]] jobject construct_u32(JNIEnv* env, u32 value);
 
-jobject construct_u64(JNIEnv* env, u64 value);
+[[nodiscard]] jobject construct_u64(JNIEnv* env, u64 value);
 
 class JavaException : std::runtime_error {
 private:
@@ -133,3 +137,112 @@ class JavaExceptionAlreadyThrown : std::runtime_error {
 public:
     explicit JavaExceptionAlreadyThrown();
 };
+
+template<typename T>
+concept IsJavaTypeDescription = requires(T) {
+    { T::java_class } -> std::convertible_to<const char*>;
+    { T::java_type } -> std::convertible_to<const char*>;
+    typename T::native_type;
+};
+
+static_assert(not IsJavaTypeDescription<bool>);
+
+template<typename T>
+concept IsJavaObject = IsJavaTypeDescription<T> && requires(T) { std::is_same_v<typename T::native_type, jobject>; };
+
+static_assert(not IsJavaObject<bool>);
+
+template<typename T>
+concept IsJavaListImpl = IsJavaTypeDescription<T> && requires(T) {
+    { T::has_initial_capacity_constructor } -> std::convertible_to<bool>;
+};
+
+
+// see: https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/ArrayList.html
+struct ArrayListImpl {
+    static constexpr const char* java_class = JAVA_ARRAYLIST_CLASS;
+    static constexpr const char* java_type = TYPE_FOR_CLASS(JAVA_ARRAYLIST_CLASS);
+
+    static constexpr bool has_initial_capacity_constructor = true;
+
+    using native_type = jobject;
+};
+
+
+static_assert(IsJavaListImpl<ArrayListImpl>);
+
+// see https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html
+template<typename ListImpl, typename T>
+    requires IsJavaListImpl<ListImpl> && IsJavaTypeDescription<T> && IsJavaObject<T>
+class JList {
+private:
+    jobject m_instance;
+    jclass m_class_impl;
+
+public:
+    explicit JList(JNIEnv* env) {
+
+        const auto [list_class, list_constructor] =
+                get_constructor_for_class(env, ListImpl::java_class, CONSTRUCTOR_TYPE(""));
+
+        m_class_impl = list_class;
+
+        jobject list_instance = env->NewObject(list_class, list_constructor);
+
+
+        if (list_instance == nullptr) {
+            throw JavaException(ExceptionInInitializerError, "Could not construct '" + ListImpl::java_class + "'");
+        }
+
+        if (env->ExceptionOccurred() != nullptr) {
+            throw JavaExceptionAlreadyThrown();
+        }
+
+        m_instance = list_instance;
+    }
+
+
+    explicit JList(JNIEnv* env, jint initial_capacity)
+        requires ListImpl::has_initial_capacity_constructor
+    {
+
+        const auto [list_class, list_constructor] =
+                get_constructor_for_class(env, ListImpl::java_class, CONSTRUCTOR_TYPE(INTEGER_LITERAL_TYPE));
+
+        m_class_impl = list_class;
+
+        jobject list_instance = env->NewObject(list_class, list_constructor, initial_capacity);
+
+
+        if (list_instance == nullptr) {
+            throw JavaException(ExceptionInInitializerError, "Could not construct '" + ListImpl::java_class + "'");
+        }
+
+        if (env->ExceptionOccurred() != nullptr) {
+            throw JavaExceptionAlreadyThrown();
+        }
+
+        m_instance = list_instance;
+    }
+
+    [[nodiscard]] jboolean append(JNIEnv* env, T::native_type elem) {
+
+
+        const auto [_, list_add_function] =
+                get_method_for_class(env, m_class_impl, "add", METHOD_TYPE(+T::java_type +, BOOLEAN_LITERAL_TYPE));
+
+
+        jboolean result = env->CallBooleanMethod(m_instance, list_add_function, elem);
+
+
+        if (env->ExceptionOccurred() != nullptr) {
+            throw JavaExceptionAlreadyThrown();
+        }
+
+        return result;
+    }
+};
+
+template<typename T>
+    requires IsJavaTypeDescription<T>
+using JArrayList = JList<ArrayListImpl, T>;
