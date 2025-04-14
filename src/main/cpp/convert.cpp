@@ -28,19 +28,25 @@ static jobject information_value_to_java(const recorder::InformationValue& infor
             information_value.underlying()
     );
 }
-
-static pybind11::dict information_to_java(const recorder::AdditionalInformation& information) {
-
+*/
+static jobject information_to_java(JNIEnv* env, const recorder::AdditionalInformation& information) {
+    /* 
     pybind11::dict result{};
 
     for (const auto& [key, raw_value] : information) {
         auto value = information_value_to_java(raw_value);
         result[pybind11::str(key)] = value;
     }
-
     return result;
+    */
+
+    //TODO
+    UNUSED(env);
+    UNUSED(information);
+    return nullptr;
 }
 
+/*
 const char* event_to_string(InputEvent event) {
     switch (event) {
         case InputEvent::RotateLeftPressed:
@@ -103,17 +109,21 @@ static pybind11::dict record_to_java(const recorder::Record& record) {
 
     return result;
 }
-
-static pybind11::list records_to_java(const std::vector<recorder::Record>& records) {
-    pybind11::list array{};
+*/
+static jobject records_to_java(JNIEnv* env, const std::vector<recorder::Record>& records) {
+    /*  pybind11::list array{};
 
     for (auto& record : records) {
         array.append(record_to_java(record));
     }
 
-    return array;
+    return array; */
+    //TODO
+    UNUSED(env);
+    UNUSED(records);
+    return nullptr;
 }
-
+/*
 
 static pybind11::dict header_to_java(const recorder::TetrionHeader& header) {
 
@@ -136,15 +146,23 @@ static pybind11::dict header_to_java(const recorder::TetrionHeader& header) {
 }
 
 
-static pybind11::list headers_to_java(const std::vector<recorder::TetrionHeader>& headers) {
-    pybind11::list array{};
+*/
+static jobject headers_to_java(JNIEnv* env, const std::vector<recorder::TetrionHeader>& headers) {
+    /*  pybind11::list array{};
 
     for (auto& header : headers) {
         array.append(header_to_java(header));
     }
 
-    return array;
+    return array; */
+
+    //TODO
+    UNUSED(env);
+    UNUSED(headers);
+    return nullptr;
 }
+
+/*
 
 
 static pybind11::dict mino_position_to_java(const grid::GridPoint& mino_position) {
@@ -248,7 +266,7 @@ struct JTetrionSnapshot {
 
 static jobject snapshot_to_java(JNIEnv* env, const TetrionSnapshot& snapshot) {
 
-    pybind11::dict result{};
+    /*  pybind11::dict result{};
 
     auto python_level = pybind11::int_(snapshot.level());
 
@@ -275,7 +293,14 @@ static jobject snapshot_to_java(JNIEnv* env, const TetrionSnapshot& snapshot) {
         result[pybind11::str(key)] = value;
     }
 
-    return result;
+    
+    return result; */
+    //TODO
+    UNUSED(tetromino_type_to_java_string);
+    //TODO
+    UNUSED(env);
+    UNUSED(snapshot);
+    return nullptr;
 }
 
 

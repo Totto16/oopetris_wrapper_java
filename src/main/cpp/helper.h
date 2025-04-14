@@ -3,7 +3,7 @@
 
 #include <jni.h>
 
-#include <memory>
+#include <sstream>
 #include <string>
 #include <utility>
 
@@ -19,7 +19,17 @@
 
 #define METHOD_TYPE(types, return_type) "(" types ")" return_type
 
-#define CONSTRUCTOR_TYPE(types) METHOD_TYPE(types, "V")
+[[nodiscard]] static constexpr std::string method_type(std::string types, std::string return_type) {
+    return "(" + types + ")" + return_type;
+}
+
+#define VOID_LITERAL_TYPE "V"
+
+#define CONSTRUCTOR_TYPE(types) METHOD_TYPE(types, VOID_LITERAL_TYPE)
+
+[[nodiscard]] static constexpr std::string constructor_type(std::string types) {
+    return method_type(types, VOID_LITERAL_TYPE);
+}
 
 #define TYPE_FOR_CLASS(name) "L" name ";"
 
@@ -138,9 +148,10 @@ public:
     explicit JavaExceptionAlreadyThrown();
 };
 
+// conecpts and templates
+
 template<typename T>
 concept IsJavaTypeDescription = requires(T) {
-    { T::java_class } -> std::convertible_to<const char*>;
     { T::java_type } -> std::convertible_to<const char*>;
     typename T::native_type;
 };
@@ -148,12 +159,178 @@ concept IsJavaTypeDescription = requires(T) {
 static_assert(not IsJavaTypeDescription<bool>);
 
 template<typename T>
-concept IsJavaTypeDescriptionForObject = IsJavaTypeDescription<T> && requires(T) { std::is_same_v<typename T::native_type, jobject>; };
+concept IsJavaClassDescription = IsJavaTypeDescription<T> && requires(T) {
+    { T::java_class } -> std::convertible_to<const char*>;
+};
+
+static_assert(not IsJavaClassDescription<bool>);
+
+template<typename T>
+concept IsJavaTypeDescriptionForObject =
+        IsJavaTypeDescription<T> && requires(T) { std::is_same_v<typename T::native_type, jobject>; };
 
 static_assert(not IsJavaTypeDescriptionForObject<bool>);
 
+
+// some conecpts are from https://stackoverflow.com/questions/76223849/how-to-write-a-concept-that-checks-for-an-inner-type-in-all-the-types-of-a-std
+
+
+template<typename>
+struct is_tuple : std::false_type { };
+
+template<typename... T>
+struct is_tuple<std::tuple<T...>> : std::true_type { };
+
+// Helper for checking that all template parameters satisfy Inner
+// concept and all pairs satisfy SameInner.
+template<typename>
+struct inner_container_impl : std::false_type { };
+
+template<template<typename...> class Tp, IsJavaTypeDescription T>
+struct inner_container_impl<Tp<T>> {
+    static constexpr bool value = true;
+};
+
+
+// Do T and U have same inner type.
+template<class T, class U>
+concept _helper_impl_1 = IsJavaTypeDescription<T> and IsJavaTypeDescription<U>;
+
+template<template<typename...> class Tp, IsJavaTypeDescription T, IsJavaTypeDescription... Ts>
+struct inner_container_impl<Tp<T, Ts...>> {
+    static constexpr bool value = (_helper_impl_1<T, Ts> and ...);
+};
+
+// The concept just use the helper.
+template<class T>
+concept InnerContainer = inner_container_impl<T>::value;
+
+
 template<typename T>
-concept IsJavaListImpl = IsJavaTypeDescription<T> && requires(T) {
+concept IsJavaConstructor = requires(T) {
+    typename T::inner;
+    is_tuple<typename T::inner>::value;
+};
+
+static_assert(not IsJavaTypeDescription<bool>);
+
+template<typename T>
+concept JavaDescriptionHasConstructorType =
+        requires(T) { typename T::constructor; } && IsJavaConstructor<typename T::constructor>;
+
+
+static_assert(not JavaDescriptionHasConstructorType<bool>);
+
+template<typename>
+struct java_get_string_for_constructor_impl {
+    static constexpr std::string value = "";
+    static constexpr const char* result = "error";
+};
+
+
+template<IsJavaTypeDescription T>
+struct get_type_of_t {
+    static constexpr const char* value = T::java_type;
+};
+
+
+template<template<typename...> class Tp, IsJavaTypeDescription T, IsJavaTypeDescription... Ts>
+struct java_get_string_for_constructor_impl<Tp<T, Ts...>> {
+    static constexpr std::string value = (std::string{ get_type_of_t<Ts>::value } + ...);
+    static constexpr const char* result = "success";
+};
+
+
+// See https://stackoverflow.com/questions/64212450/iterate-over-types-of-tuple-in-c
+template<typename T, typename FUNC>
+static inline constexpr void for_each_type(FUNC&& func) {
+    auto __hander = []<typename S, typename F2, size_t... I>(F2&& func, std::index_sequence<I...>) {
+        (func.template operator()<std::tuple_element_t<I, S>>(), ...);
+    };
+    __hander.template operator()<T>(std::forward<FUNC>(func), std::make_index_sequence<std::tuple_size<T>::value>{});
+}
+
+template<typename C>
+    requires IsJavaConstructor<C>
+constexpr std::string java_get_string_for_constructor() {
+
+    std::stringstream result{};
+
+    for_each_type<typename C::inner>([&result]<typename T>() { result << std::string{ T::java_type }; });
+
+    return constructor_type(result.str());
+}
+
+
+template<typename>
+struct map_to_expected_types_impl {
+    using value = std::tuple<>;
+};
+
+
+template<typename Tuple>
+struct map_to_expected_types_impl;
+
+template<typename T>
+using extract_type = T::native_type;
+
+
+template<class... Values>
+struct map_to_expected_types_impl<std::tuple<Values...>> {
+    using value = std::tuple<extract_type<Values>...>;
+};
+
+template<typename C>
+    requires IsJavaConstructor<C>
+using map_to_expected_types = map_to_expected_types_impl<typename C::inner>::value;
+
+
+template<typename C>
+    requires IsJavaConstructor<C>
+struct CWrapper {
+    using constructor = C;
+};
+
+
+template<typename T, typename C, typename... Args>
+    requires IsJavaTypeDescriptionForObject<T> && (IsJavaConstructor<C> || JavaDescriptionHasConstructorType<T>)
+std::pair<jclass, typename T::native_type> construct_new_java_object_extended(JNIEnv* env, Args... args) {
+
+    using ConstructorToUse = std::conditional_t<IsJavaConstructor<C>, CWrapper<C>, T>::constructor;
+
+    // assert that the passed values are the same, that we excpect, I would like to get this error prettier, but it is better than nothing
+    static_assert(std::is_same_v<std::tuple<Args...>, map_to_expected_types<ConstructorToUse>>);
+
+
+    const auto [_t_class, _t_constructor] =
+            get_constructor_for_class(env, T::java_class, java_get_string_for_constructor<ConstructorToUse>());
+
+
+    jobject _object_instance = env->NewObject(_t_class, _t_constructor, args...);
+
+    if (_object_instance == nullptr) {
+        std::string error = "Could not construct '";
+        error += T::java_class;
+        error += "'";
+        throw JavaException(ExceptionInInitializerError, error);
+    }
+
+    if (env->ExceptionOccurred() != nullptr) {
+        throw JavaExceptionAlreadyThrown();
+    }
+
+    return std::make_pair(_t_class, _object_instance);
+}
+
+template<typename T, typename... Args>
+    requires IsJavaTypeDescriptionForObject<T> && JavaDescriptionHasConstructorType<T>
+std::pair<jclass, typename T::native_type> construct_new_java_object(JNIEnv* env, Args... args) {
+    return construct_new_java_object_extended<T, bool, Args...>(env, args...);
+}
+
+
+template<typename T>
+concept IsJavaListImpl = IsJavaClassDescription<T> && requires(T) {
     { T::has_initial_capacity_constructor } -> std::convertible_to<bool>;
 };
 
@@ -171,6 +348,26 @@ struct ArrayListImpl {
 
 static_assert(IsJavaListImpl<ArrayListImpl>);
 
+
+struct ListConstructorEmpty {
+    using inner = std::tuple<>;
+};
+
+static_assert(IsJavaConstructor<ListConstructorEmpty>);
+
+struct JIntDescription {
+    static constexpr const char* java_type = INTEGER_LITERAL_TYPE;
+    using native_type = jint;
+};
+
+static_assert(IsJavaTypeDescription<JIntDescription>);
+
+struct ListConstructorWithCapacity {
+    using inner = std::tuple<JIntDescription>;
+};
+
+static_assert(IsJavaConstructor<ListConstructorWithCapacity>);
+
 // see https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html
 template<typename ListImpl, typename T>
     requires IsJavaListImpl<ListImpl> && IsJavaTypeDescriptionForObject<T>
@@ -182,22 +379,11 @@ private:
 public:
     explicit JList(JNIEnv* env) {
 
-        const auto [list_class, list_constructor] =
-                get_constructor_for_class(env, ListImpl::java_class, CONSTRUCTOR_TYPE(""));
+
+        const auto [list_class, list_instance] =
+                construct_new_java_object_extended<ListImpl, ListConstructorEmpty>(env);
 
         m_class_impl = list_class;
-
-        jobject list_instance = env->NewObject(list_class, list_constructor);
-
-
-        if (list_instance == nullptr) {
-            throw JavaException(ExceptionInInitializerError, "Could not construct '" + ListImpl::java_class + "'");
-        }
-
-        if (env->ExceptionOccurred() != nullptr) {
-            throw JavaExceptionAlreadyThrown();
-        }
-
         m_instance = list_instance;
     }
 
@@ -206,22 +392,10 @@ public:
         requires ListImpl::has_initial_capacity_constructor
     {
 
-        const auto [list_class, list_constructor] =
-                get_constructor_for_class(env, ListImpl::java_class, CONSTRUCTOR_TYPE(INTEGER_LITERAL_TYPE));
+        const auto [list_class, list_instance] =
+                construct_new_java_object_extended<ListImpl, ListConstructorWithCapacity>(env, initial_capacity);
 
         m_class_impl = list_class;
-
-        jobject list_instance = env->NewObject(list_class, list_constructor, initial_capacity);
-
-
-        if (list_instance == nullptr) {
-            throw JavaException(ExceptionInInitializerError, "Could not construct '" + ListImpl::java_class + "'");
-        }
-
-        if (env->ExceptionOccurred() != nullptr) {
-            throw JavaExceptionAlreadyThrown();
-        }
-
         m_instance = list_instance;
     }
 
@@ -229,7 +403,7 @@ public:
 
 
         const auto [_, list_add_function] =
-                get_method_for_class(env, m_class_impl, "add", METHOD_TYPE(+T::java_type +, BOOLEAN_LITERAL_TYPE));
+                get_method_for_class(env, m_class_impl, "add", method_type(T::java_type, BOOLEAN_LITERAL_TYPE));
 
 
         jboolean result = env->CallBooleanMethod(m_instance, list_add_function, elem);
