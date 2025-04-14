@@ -9,13 +9,13 @@
 
 #include <core/helper/types.hpp>
 
-// oopetris specific names
-
-#define JAVA_OOPETRIS_CLASS_NAME "com/github/oopetris"
-
-#define JAVA_OOPETRIS_CLASS(name) JAVA_OOPETRIS_CLASS_NAME "/" name
 
 // helper
+
+#define JAVA_CLASS_NAME_SEPERATOR "/"
+
+// method decl have an empty seperator
+#define METHOD_DECL_SEPERATOR ""
 
 #define METHOD_TYPE(types, return_type) "(" types ")" return_type
 
@@ -25,16 +25,22 @@
 
 #define JAVA_CONSTRUCTOR_NAME "<init>"
 
-// no seperator
-#define METHOD_DECL_SEPERATOR ""
+// oopetris specific names
+
+#define JAVA_OOPETRIS_CLASS_NAME "com" JAVA_CLASS_NAME_SEPERATOR "github" JAVA_CLASS_NAME_SEPERATOR "oopetris"
+
+#define JAVA_OOPETRIS_CLASS(name) JAVA_OOPETRIS_CLASS_NAME "/" name
+
 
 // base names
 
-#define JAVA_LANG_BASE_PACKAGE "java/lang"
+#define JAVA_LANG_BASE_PACKAGE "java" JAVA_CLASS_NAME_SEPERATOR "lang"
 
-#define JAVA_IO_BASE_PACKAGE "java/io"
+#define JAVA_UTIL_BASE_PACKAGE "java" JAVA_CLASS_NAME_SEPERATOR "util"
 
-#define JOOU_BASE_PACKAGE "org/joou"
+#define JAVA_IO_BASE_PACKAGE "java" JAVA_CLASS_NAME_SEPERATOR "io"
+
+#define JOOU_BASE_PACKAGE "org" JAVA_CLASS_NAME_SEPERATOR "joou"
 
 // literal types
 
@@ -51,30 +57,38 @@
 
 // JOOU types
 
-#define U8_JAVA_CLASS JOOU_BASE_PACKAGE "/UByte"
+#define U8_JAVA_CLASS JOOU_BASE_PACKAGE JAVA_CLASS_NAME_SEPERATOR "UByte"
 
 #define U8_JAVA_TYPE TYPE_FOR_CLASS(U8_JAVA_CLASS)
 
-#define U32_JAVA_CLASS JOOU_BASE_PACKAGE "/UInteger"
+#define U32_JAVA_CLASS JOOU_BASE_PACKAGE JAVA_CLASS_NAME_SEPERATOR "UInteger"
 
 #define U32_JAVA_TYPE TYPE_FOR_CLASS(U32_JAVA_CLASS)
 
-#define U64_JAVA_CLASS JOOU_BASE_PACKAGE "/ULong"
+#define U64_JAVA_CLASS JOOU_BASE_PACKAGE JAVA_CLASS_NAME_SEPERATOR "ULong"
 
 #define U64_JAVA_TYPE TYPE_FOR_CLASS(U64_JAVA_CLASS)
 
 
 // error codes
 
-#define NoClassDefFoundError JAVA_LANG_BASE_PACKAGE "/NoClassDefFoundError"
+#define NoClassDefFoundError JAVA_LANG_BASE_PACKAGE JAVA_CLASS_NAME_SEPERATOR "NoClassDefFoundError"
 
-#define NoSuchMethodError JAVA_LANG_BASE_PACKAGE "/NoSuchMethodError"
+#define NoSuchMethodError JAVA_LANG_BASE_PACKAGE JAVA_CLASS_NAME_SEPERATOR "NoSuchMethodError"
 
-#define ExceptionInInitializerError JAVA_LANG_BASE_PACKAGE "/ExceptionInInitializerError"
+#define ExceptionInInitializerError JAVA_LANG_BASE_PACKAGE JAVA_CLASS_NAME_SEPERATOR "ExceptionInInitializerError"
 
-#define RuntimeException JAVA_LANG_BASE_PACKAGE "/RuntimeException"
+#define RuntimeException JAVA_LANG_BASE_PACKAGE JAVA_CLASS_NAME_SEPERATOR "RuntimeException"
 
-#define FileNotFoundException JAVA_IO_BASE_PACKAGE "/FileNotFoundException"
+#define FileNotFoundException JAVA_IO_BASE_PACKAGE JAVA_CLASS_NAME_SEPERATOR "FileNotFoundException"
+
+// classes
+
+#define JAVA_LIST_CLASS JAVA_UTIL_BASE_PACKAGE JAVA_CLASS_NAME_SEPERATOR "List"
+
+#define JAVA_ARRAYLIST_CLASS JAVA_UTIL_BASE_PACKAGE JAVA_CLASS_NAME_SEPERATOR "ArrayList"
+
+#define JAVA_MAP_CLASS JAVA_UTIL_BASE_PACKAGE JAVA_CLASS_NAME_SEPERATOR "Map"
 
 
 // functions
