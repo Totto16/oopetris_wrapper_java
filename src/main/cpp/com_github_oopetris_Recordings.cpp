@@ -92,11 +92,7 @@ static jstring _cpp_impl_get_version(JNIEnv* env) {
 
     const std::string str = utils::version();
 
-    jstring jversion = env->NewStringUTF(str.c_str());
-
-    if (jversion == nullptr) {
-        throw JavaException(ExceptionInInitializerError, "Could not construct version string");
-    }
+    jstring jversion = JNI_get_jstring(env, str);
 
     return jversion;
 

@@ -81,7 +81,11 @@
 
 std::string JNI_jstring_to_string(JNIEnv* env, jstring j_str);
 
-std::pair<jclass, jmethodID>
+[[nodiscard]] jstring JNI_get_jstring(JNIEnv* env, std::string str);
+
+[[nodiscard]] jstring JNI_get_jstring(JNIEnv* env, const char* c_str);
+
+[[nodiscard]] std::pair<jclass, jmethodID>
 get_constructor_for_class(JNIEnv* env, std::string class_name, std::string constructor_signature);
 
 std::pair<jclass, jmethodID>

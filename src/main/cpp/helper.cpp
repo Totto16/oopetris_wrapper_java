@@ -26,6 +26,29 @@ std::string JNI_jstring_to_string(JNIEnv* env, jstring j_str) {
 }
 
 
+[[nodiscard]] static jstring _impl_JNI_get_jstring(JNIEnv* env, const char* c_str) {
+    jstring result = env->NewStringUTF(c_str);
+
+    if (result == nullptr) {
+        throw JavaException(ExceptionInInitializerError, "Could not construct jstring");
+    }
+
+    if (env->ExceptionOccurred() != nullptr) {
+        throw JavaExceptionAlreadyThrown();
+    }
+
+    return result;
+}
+
+jstring JNI_get_jstring(JNIEnv* env, std::string str) {
+    return _impl_JNI_get_jstring(env, str.c_str());
+}
+
+[[nodiscard]] jstring JNI_get_jstring(JNIEnv* env, const char* c_str) {
+    return _impl_JNI_get_jstring(env, c_str);
+}
+
+
 std::pair<jclass, jmethodID>
 get_constructor_for_class(JNIEnv* env, std::string class_name, std::string constructor_signature) {
 
