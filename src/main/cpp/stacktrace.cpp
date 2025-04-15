@@ -127,22 +127,27 @@ jthrowable CPPStackTraceEntry::add_stack_trace_to_throwable(JNIEnv* env, jthrowa
 
     const auto& entries = _g_cpp_stack_trace_local.entries();
 
-    jsize new_length = array_length + static_cast<jsize>(entries.size());
+    jsize entries_length = static_cast<jsize>(entries.size());
+
+    jsize new_length = array_length + entries_length;
 
     jobjectArray new_stack_trace_array = env->NewObjectArray(new_length, stack_trace_element_class, nullptr);
 
-    for (jsize i = 0; i < array_length; ++i) {
-        jobject old_value = env->GetObjectArrayElement(current_stack_trace_array, i);
-
-        env->SetObjectArrayElement(new_stack_trace_array, i, old_value);
-    }
-
-    for (jsize i = 0; i < static_cast<jsize>(entries.size()); ++i) {
+    // add the entries in reverse order
+    for (jsize i = 0; i < entries_length; ++i) {
         const auto& cpp_stack_trace = entries.at(i);
 
         jobject java_stack_trace_element = cpp_stack_trace.to_java_stack_trace_element(env);
 
-        env->SetObjectArrayElement(new_stack_trace_array, i + array_length, java_stack_trace_element);
+        env->SetObjectArrayElement(new_stack_trace_array, entries_length - i - 1, java_stack_trace_element);
+    }
+
+
+    // add them entries_length later, since they are already in the correct order
+    for (jsize i = 0; i < array_length; ++i) {
+        jobject old_value = env->GetObjectArrayElement(current_stack_trace_array, i);
+
+        env->SetObjectArrayElement(new_stack_trace_array, i + entries_length, old_value);
     }
 
     // set the value
