@@ -80,6 +80,7 @@ private:
 
     static void add_stack_trace_element(CPPStackTraceEntry&& entry);
     void remove_stack_trace_element();
+    void mark_stack_trace_element_as_relevant_for_exception();
 
 public:
     RAAIStackTraceEntry(CPPStackTraceEntry&& entry);

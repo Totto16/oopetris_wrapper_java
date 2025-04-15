@@ -2,6 +2,7 @@
 
 #include "./stacktrace.h"
 
+#include <optional>
 #include <vector>
 
 
@@ -30,9 +31,58 @@
     return jstacktrace_element;
 }
 
+namespace {
+    struct CppStackTraceObect {
+    private:
+        std::vector<CPPStackTraceEntry> m_entries{};
+
+        // with this mark we support self cleanup of stack frames, that might be needed by the exception catch body, but the body recovers everything and we need a partial stack frame, that remains, but the old one needs to be present, so that the body can use the stack frame of the place, hwere the exception was thrown
+        std::optional<std::size_t> m_mark = std::nullopt;
+
+        void clean_up_orphaned_entries() {
+            while (m_entries.size() > m_mark.value()) {
+                m_entries.pop_back();
+            }
+
+            m_mark = std::nullopt;
+        }
+
+    public:
+        CppStackTraceObect() = default;
+
+        [[nodiscard]] const std::vector<CPPStackTraceEntry>& entries() const {
+            return m_entries;
+        }
+
+        [[nodiscard]] std::vector<CPPStackTraceEntry>& entries() {
+            return m_entries;
+        }
+
+        void mark_relevant_for_exception_index(std::size_t index) {
+            m_mark = index;
+        }
+
+        void clean_up_orphaned_entries_if_necessary() {
+            if (m_mark.has_value()) {
+                clean_up_orphaned_entries();
+            }
+        }
+
+        void add_new_entry(CPPStackTraceEntry&& entry) {
+            // if the user doesn't clean up orphaned entries after an excprion was thrown, do it here
+            if (m_mark.has_value()) {
+                clean_up_orphaned_entries();
+            }
+
+            m_entries.emplace_back(std::move(entry));
+        }
+    };
+
+} // namespace
+
 
 // global thread local c++ stack trace storage, is used when we throw a java exception, to setup the stack trace of that Throwable!
-thread_local std::vector<CPPStackTraceEntry> _g_cpp_stack_trace_local = {};
+thread_local CppStackTraceObect _g_cpp_stack_trace_local = {};
 
 
 jthrowable CPPStackTraceEntry::add_stack_trace_to_throwable(JNIEnv* env, jthrowable throwable) {
@@ -47,7 +97,6 @@ jthrowable CPPStackTraceEntry::add_stack_trace_to_throwable(JNIEnv* env, jthrowa
     const auto [_, get_stack_trace_function] = get_method_for_class(
             env, JThrowable::java_class, "getStackTrace", method_type("", stack_trace_element_array_type)
     );
-
 
     jobject current_stack_trace = env->CallObjectMethod(throwable, get_stack_trace_function);
 
@@ -77,7 +126,9 @@ jthrowable CPPStackTraceEntry::add_stack_trace_to_throwable(JNIEnv* env, jthrowa
 
     jsize array_length = env->GetArrayLength(current_stack_trace_array);
 
-    jsize new_length = array_length + static_cast<jsize>(_g_cpp_stack_trace_local.size());
+    const auto& entries = _g_cpp_stack_trace_local.entries();
+
+    jsize new_length = array_length + static_cast<jsize>(entries.size());
 
     jobjectArray new_stack_trace_array = env->NewObjectArray(new_length, stack_trace_element_class, nullptr);
 
@@ -87,9 +138,8 @@ jthrowable CPPStackTraceEntry::add_stack_trace_to_throwable(JNIEnv* env, jthrowa
         env->SetObjectArrayElement(new_stack_trace_array, i, old_value);
     }
 
-
-    for (jsize i = 0; i < static_cast<jsize>(_g_cpp_stack_trace_local.size()); ++i) {
-        auto& cpp_stack_trace = _g_cpp_stack_trace_local.at(i);
+    for (jsize i = 0; i < static_cast<jsize>(entries.size()); ++i) {
+        const auto& cpp_stack_trace = entries.at(i);
 
         jobject java_stack_trace_element = cpp_stack_trace.to_java_stack_trace_element(env);
 
@@ -108,6 +158,9 @@ jthrowable CPPStackTraceEntry::add_stack_trace_to_throwable(JNIEnv* env, jthrowa
         throw JavaExceptionAlreadyThrown();
     }
 
+    // clean up the now no more needed entries
+    _g_cpp_stack_trace_local.clean_up_orphaned_entries_if_necessary();
+
     return throwable;
 
     // if such exception happen, just report them as Fatal, as this function should enver fail in any way!
@@ -121,22 +174,32 @@ jthrowable CPPStackTraceEntry::add_stack_trace_to_throwable(JNIEnv* env, jthrowa
 
 
 void RAAIStackTraceEntry::add_stack_trace_element(CPPStackTraceEntry&& entry) {
-    _g_cpp_stack_trace_local.emplace_back(std::move(entry));
+    _g_cpp_stack_trace_local.add_new_entry(std::move(entry));
 }
 
 void RAAIStackTraceEntry::remove_stack_trace_element() {
 
-    while (_g_cpp_stack_trace_local.size() > m_stack_size_on_add) {
-        _g_cpp_stack_trace_local.pop_back();
+    while (_g_cpp_stack_trace_local.entries().size() > m_stack_size_on_add) {
+        _g_cpp_stack_trace_local.entries().pop_back();
     }
 }
 
+
+void RAAIStackTraceEntry::mark_stack_trace_element_as_relevant_for_exception() {
+    _g_cpp_stack_trace_local.mark_relevant_for_exception_index(m_stack_size_on_add);
+}
+
+
 RAAIStackTraceEntry::RAAIStackTraceEntry(CPPStackTraceEntry&& entry)
-    : m_stack_size_on_add{ _g_cpp_stack_trace_local.size() } {
+    : m_stack_size_on_add{ _g_cpp_stack_trace_local.entries().size() } {
     RAAIStackTraceEntry::add_stack_trace_element(std::move(entry));
 }
 
 RAAIStackTraceEntry::~RAAIStackTraceEntry() {
+    if (std::uncaught_exceptions() > 0) {
+        mark_stack_trace_element_as_relevant_for_exception();
+        return;
+    }
     remove_stack_trace_element();
 }
 
