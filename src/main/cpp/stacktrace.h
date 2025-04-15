@@ -8,7 +8,7 @@
 #include "./helper.h"
 #include "./jni_cpp.h"
 
-// stack trace helkper macros
+// stack trace helper macros
 
 #ifdef NDEBUG
 #define STACK_TRACE_ADD_CUSTOM(CLASS_NAME, METHOD_NAME, local_name)
@@ -21,7 +21,7 @@
 
 #define STACK_TRACE_ADD(CLASS_NAME, local_name) STACK_TRACE_ADD_CUSTOM(CLASS_NAME, __PRETTY_FUNCTION__, local_name)
 
-// java desxcriptions
+// java descriptions
 
 #define JAVA_STACKTRACE_ELEMENT_CLASS JAVA_LANG_BASE_PACKAGE JAVA_CLASS_NAME_SEPERATOR "StackTraceElement"
 

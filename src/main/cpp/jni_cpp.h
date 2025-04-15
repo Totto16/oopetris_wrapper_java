@@ -210,14 +210,12 @@ static_assert(not IsJavaTypeDescriptionForEnum<bool>);
 template<typename T>
     requires IsJavaTypeDescriptionForEnum<T>
 T::native_type construct_new_java_enum(JNIEnv* env, typename T::enum_type::enum_type value) {
-
     using EnumType = T::enum_type;
     static_assert(IsJavaEnum<EnumType>);
 
     std::string field_name = EnumType::value_to_string(value);
 
-    const auto [_t_class, _t_field_id] = get_static_field_for_class(env, T::java_class, field_name, "");
-
+    const auto [_t_class, _t_field_id] = get_static_field_for_class(env, T::java_class, field_name, T::java_type);
 
     static_assert(std::is_same_v<typename T::native_type, jobject>);
     jobject _t_field_value = env->GetStaticObjectField(_t_class, _t_field_id);
