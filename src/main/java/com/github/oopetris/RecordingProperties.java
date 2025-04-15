@@ -12,8 +12,6 @@ public class RecordingProperties {
 
     @Override
     public final boolean equals(Object o) {
-        System.err.println("HERE EQUALS" + o);
-
         if (!(o instanceof RecordingProperties that)) {
             return false;
         }
