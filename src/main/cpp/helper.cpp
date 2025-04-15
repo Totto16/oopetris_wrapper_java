@@ -64,7 +64,6 @@ get_constructor_for_class(JNIEnv* env, std::string class_name, std::string const
 [[nodiscard]] std::pair<jclass, jmethodID>
 get_method_for_class(JNIEnv* env, jclass clazz, std::string method_name, std::string method_signature) {
 
-
     jmethodID found_method = env->GetMethodID(clazz, method_name.c_str(), method_signature.c_str());
 
     if (found_method == nullptr) {
