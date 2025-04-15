@@ -8,12 +8,20 @@
 #include "./helper.h"
 #include "./jni_cpp.h"
 
+// stack trace helkper macros
+
 #ifdef NDEBUG
-#define STACK_TRACE_ADD(NAME)
+#define STACK_TRACE_ADD_CUSTOM(CLASS_NAME, METHOD_NAME, local_name)
 #else
-#define STACK_TRACE_ADD(NAME) RAAIStackTraceEntry(NAME, __PRETTY_FUNCTION__, __LINE__, __FILE__);
+#define STACK_TRACE_ADD_CUSTOM(CLASS_NAME, METHOD_NAME, local_name)       \
+    RAAIStackTraceEntry local_name{                                       \
+        CPPStackTraceEntry{ CLASS_NAME, METHOD_NAME, __FILE__, __LINE__ } \
+    };
 #endif
 
+#define STACK_TRACE_ADD(CLASS_NAME, local_name) STACK_TRACE_ADD_CUSTOM(CLASS_NAME, __PRETTY_FUNCTION__, local_name)
+
+// java desxcriptions
 
 #define JAVA_STACKTRACE_ELEMENT_CLASS JAVA_LANG_BASE_PACKAGE JAVA_CLASS_NAME_SEPERATOR "StackTraceElement"
 

@@ -6,6 +6,12 @@
 #include "./jni_cpp.h"
 #include "./list.h"
 #include "./map.h"
+#include "./stacktrace.h"
+
+#define STACK_TRACE_RECORDINGS_CLASS_NAME "Recordings"
+
+
+#define STACK_TRACE_ADD_RECORDINGS(local_name) STACK_TRACE_ADD(STACK_TRACE_RECORDINGS_CLASS_NAME, local_name)
 
 struct JAdditionalInformationValue {
 
@@ -86,9 +92,18 @@ static_assert(IsJavaConstructor<JAdditionalInformationValueConstructorList>);
 
 static jobject information_value_to_java(JNIEnv* env, const recorder::InformationValue& information_value) {
 
+#define STACK_TRACE_ADD_RECORDINGS_OVERLOADED(type, local_name) \
+    STACK_TRACE_ADD_CUSTOM(                                     \
+            STACK_TRACE_RECORDINGS_CLASS_NAME,                  \
+            "information_value_to_java_"                        \
+            "from_" type "(const <value>& value)",              \
+            local_name                                          \
+    )
+
     return std::visit(
             helper::Overloaded{
                     [&env](const std::string& value) -> jobject {
+                        STACK_TRACE_ADD_RECORDINGS_OVERLOADED("string", _stack_scope)
                         jstring jstr = JNI_get_jstring(env, value);
 
                         const auto [_, jinformation_value] = construct_new_java_object_extended<
@@ -97,6 +112,7 @@ static jobject information_value_to_java(JNIEnv* env, const recorder::Informatio
                         return jinformation_value;
                     },
                     [&env](const float& value) -> jobject {
+                        STACK_TRACE_ADD_RECORDINGS_OVERLOADED("float", _stack_scope)
                         const auto [_, jvalue] =
                                 construct_new_java_object<JFloatDescription>(env, static_cast<jfloat>(value));
 
@@ -106,6 +122,7 @@ static jobject information_value_to_java(JNIEnv* env, const recorder::Informatio
                         return jinformation_value;
                     },
                     [&env](const double& value) -> jobject {
+                        STACK_TRACE_ADD_RECORDINGS_OVERLOADED("double", _stack_scope)
                         const auto [_, jvalue] =
                                 construct_new_java_object<JDoubleDescription>(env, static_cast<jdouble>(value));
 
@@ -115,6 +132,7 @@ static jobject information_value_to_java(JNIEnv* env, const recorder::Informatio
                         return jinformation_value;
                     },
                     [&env](const bool& value) -> jobject {
+                        STACK_TRACE_ADD_RECORDINGS_OVERLOADED("bool", _stack_scope)
                         const auto [_, jvalue] =
                                 construct_new_java_object<JBooleanDescription>(env, static_cast<jboolean>(value));
 
@@ -126,6 +144,7 @@ static jobject information_value_to_java(JNIEnv* env, const recorder::Informatio
                         return jinformation_value;
                     },
                     [&env](const u8& value) -> jobject {
+                        STACK_TRACE_ADD_RECORDINGS_OVERLOADED("u8", _stack_scope)
                         jobject u8_value = construct_u8(env, value);
 
                         const auto [_, jinformation_value] = construct_new_java_object_extended<
@@ -134,6 +153,7 @@ static jobject information_value_to_java(JNIEnv* env, const recorder::Informatio
                         return jinformation_value;
                     },
                     [&env](const i8& value) -> jobject {
+                        STACK_TRACE_ADD_RECORDINGS_OVERLOADED("i8", _stack_scope)
                         const auto [_, jvalue] =
                                 construct_new_java_object<JByteDescription>(env, static_cast<jbyte>(value));
 
@@ -143,6 +163,7 @@ static jobject information_value_to_java(JNIEnv* env, const recorder::Informatio
                         return jinformation_value;
                     },
                     [&env](const u32& value) -> jobject {
+                        STACK_TRACE_ADD_RECORDINGS_OVERLOADED("u32", _stack_scope)
                         jobject u32_value = construct_u32(env, value);
 
                         const auto [_, jinformation_value] = construct_new_java_object_extended<
@@ -151,6 +172,7 @@ static jobject information_value_to_java(JNIEnv* env, const recorder::Informatio
                         return jinformation_value;
                     },
                     [&env](const i32& value) -> jobject {
+                        STACK_TRACE_ADD_RECORDINGS_OVERLOADED("i32", _stack_scope)
                         const auto [_, jvalue] =
                                 construct_new_java_object<JIntegerDescription>(env, static_cast<jint>(value));
 
@@ -160,6 +182,7 @@ static jobject information_value_to_java(JNIEnv* env, const recorder::Informatio
                         return jinformation_value;
                     },
                     [&env](const u64& value) -> jobject {
+                        STACK_TRACE_ADD_RECORDINGS_OVERLOADED("u64", _stack_scope)
                         jobject u64_value = construct_u64(env, value);
 
                         const auto [_, jinformation_value] = construct_new_java_object_extended<
@@ -168,6 +191,7 @@ static jobject information_value_to_java(JNIEnv* env, const recorder::Informatio
                         return jinformation_value;
                     },
                     [&env](const i64& value) -> jobject {
+                        STACK_TRACE_ADD_RECORDINGS_OVERLOADED("i64", _stack_scope)
                         const auto [_, jvalue] =
                                 construct_new_java_object<JLongDescription>(env, static_cast<jlong>(value));
 
@@ -177,6 +201,7 @@ static jobject information_value_to_java(JNIEnv* env, const recorder::Informatio
                         return jinformation_value;
                     },
                     [&env](const std::vector<recorder::InformationValue>& values) -> jobject {
+                        STACK_TRACE_ADD_RECORDINGS_OVERLOADED("list", _stack_scope)
                         JArrayList<JAdditionalInformationValue> list{ env, static_cast<jint>(values.size()) };
 
                         for (auto& value : values) {
@@ -195,7 +220,11 @@ static jobject information_value_to_java(JNIEnv* env, const recorder::Informatio
     );
 }
 
+#undef STACK_TRACE_ADD_RECORDINGS_OVERLOADED
+
 static jobject information_to_java(JNIEnv* env, const recorder::AdditionalInformation& information) {
+    STACK_TRACE_ADD_RECORDINGS(_stack_scope)
+
     JHashMap<JStringDescription, JAdditionalInformationValue> map{ env };
 
     for (const auto& [key, raw_value] : information) {
@@ -261,6 +290,8 @@ struct JInputEvent {
 static_assert(IsJavaTypeDescriptionForEnum<JInputEvent>);
 
 static jobject event_to_java(JNIEnv* env, InputEvent event) {
+    STACK_TRACE_ADD_RECORDINGS(_stack_scope)
+
     return construct_new_java_enum<JInputEvent>(env, event);
 }
 
@@ -282,7 +313,7 @@ static_assert(JavaDescriptionHasConstructorType<JTetrionRecord>);
 
 
 static jobject record_to_java(JNIEnv* env, const recorder::Record& record) {
-
+    STACK_TRACE_ADD_RECORDINGS(_stack_scope)
 
     jobject java_event = event_to_java(env, record.event);
 
@@ -298,6 +329,8 @@ static jobject record_to_java(JNIEnv* env, const recorder::Record& record) {
 
 
 static jobject records_to_java(JNIEnv* env, const std::vector<recorder::Record>& records) {
+    STACK_TRACE_ADD_RECORDINGS(_stack_scope)
+
     JArrayList<JTetrionRecord> list{ env, static_cast<jint>(records.size()) };
 
     for (auto& record : records) {
@@ -328,6 +361,7 @@ static_assert(JavaDescriptionHasConstructorType<JTetrionHeader>);
 
 
 static jobject header_to_java(JNIEnv* env, const recorder::TetrionHeader& header) {
+    STACK_TRACE_ADD_RECORDINGS(_stack_scope)
 
     jobject java_seed = construct_u64(env, header.seed);
 
@@ -340,6 +374,8 @@ static jobject header_to_java(JNIEnv* env, const recorder::TetrionHeader& header
 
 
 static jobject headers_to_java(JNIEnv* env, const std::vector<recorder::TetrionHeader>& headers) {
+    STACK_TRACE_ADD_RECORDINGS(_stack_scope)
+
     JArrayList<JTetrionHeader> list{ env, static_cast<jint>(headers.size()) };
 
     for (auto& header : headers) {
@@ -370,6 +406,7 @@ static_assert(JavaDescriptionHasConstructorType<JMinoPosition>);
 
 
 static jobject mino_position_to_java(JNIEnv* env, const grid::GridPoint& mino_position) {
+    STACK_TRACE_ADD_RECORDINGS(_stack_scope)
 
     auto mino_pos = mino_position.cast<uint8_t>();
 
@@ -426,6 +463,7 @@ static_assert(IsJavaTypeDescriptionForEnum<JTetrominoType>);
 
 
 static jobject tetromino_type_to_java(JNIEnv* env, helper::TetrominoType type) {
+    STACK_TRACE_ADD_RECORDINGS(_stack_scope)
 
     return construct_new_java_enum<JTetrominoType>(env, type);
 }
@@ -447,7 +485,7 @@ static_assert(JavaDescriptionHasConstructorType<JMino>);
 
 
 static jobject mino_to_java(JNIEnv* env, const Mino& mino) {
-
+    STACK_TRACE_ADD_RECORDINGS(_stack_scope)
 
     jobject java_position = mino_position_to_java(env, mino.position());
 
@@ -460,6 +498,8 @@ static jobject mino_to_java(JNIEnv* env, const Mino& mino) {
 
 
 static jobject mino_stack_to_java(JNIEnv* env, const std::vector<Mino>& mino_stack) {
+    STACK_TRACE_ADD_RECORDINGS(_stack_scope)
+
     JArrayList<JMino> list{ env, static_cast<jint>(mino_stack.size()) };
 
     for (auto& mino : mino_stack) {
@@ -497,6 +537,8 @@ static_assert(JavaDescriptionHasConstructorType<JTetrionSnapshot>);
 
 static jobject snapshot_to_java(JNIEnv* env, const TetrionSnapshot& snapshot) {
 
+    STACK_TRACE_ADD_RECORDINGS(_stack_scope)
+
     auto jlevel = construct_u32(env, snapshot.level());
 
     auto jlines_cleared = construct_u32(env, snapshot.lines_cleared());
@@ -509,7 +551,6 @@ static jobject snapshot_to_java(JNIEnv* env, const TetrionSnapshot& snapshot) {
 
     auto jtetrion_index = construct_u8(env, snapshot.tetrion_index());
 
-
     const auto [_, recording_information] = construct_new_java_object<JTetrionSnapshot>(
             env, jlevel, jlines_cleared, jmino_stack, jscore, jsimulation_step_index, jtetrion_index
     );
@@ -521,6 +562,9 @@ static jobject snapshot_to_java(JNIEnv* env, const TetrionSnapshot& snapshot) {
 static_assert(IsJavaTypeDescriptionForObject<JTetrionSnapshot>);
 
 static jobject snapshots_to_java(JNIEnv* env, const std::vector<TetrionSnapshot>& snapshots) {
+
+    STACK_TRACE_ADD_RECORDINGS(_stack_scope)
+
     JArrayList<JTetrionSnapshot> list{ env, static_cast<jint>(snapshots.size()) };
 
     for (auto& snapshot : snapshots) {
@@ -551,6 +595,8 @@ static_assert(JavaDescriptionHasConstructorType<JRecordingInformation>);
 
 
 jobject recording_reader_to_java(JNIEnv* env, const recorder::RecordingReader& reader) {
+
+    STACK_TRACE_ADD_RECORDINGS(_stack_scope)
 
     auto jinformation = information_to_java(env, reader.information());
 
@@ -606,6 +652,8 @@ static_assert(JavaDescriptionHasConstructorType<JRecordingProperties>);
 
 
 jobject properties_to_java(JNIEnv* env) {
+
+    STACK_TRACE_ADD_RECORDINGS(_stack_scope)
 
     jobject jheight = construct_u8(env, grid::height_in_tiles);
 
