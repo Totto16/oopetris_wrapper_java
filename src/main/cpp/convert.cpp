@@ -162,98 +162,128 @@ static jobject headers_to_java(JNIEnv* env, const std::vector<recorder::TetrionH
     return nullptr;
 }
 
-/*
+
+struct JMinoPosition {
+
+    static constexpr const char* java_class = JAVA_OOPETRIS_CLASS("MinoPosition");
+    static constexpr const char* java_type = TYPE_FOR_CLASS(JAVA_OOPETRIS_CLASS("MinoPosition"));
+
+    using native_type = jobject;
+
+    using constructor = struct {
+        using inner = std::tuple<JU8Description, JU8Description>;
+    };
+};
+
+static_assert(IsJavaTypeDescriptionForObject<JMinoPosition>);
+static_assert(JavaDescriptionHasConstructorType<JMinoPosition>);
 
 
-static pybind11::dict mino_position_to_java(const grid::GridPoint& mino_position) {
+static jobject mino_position_to_java(JNIEnv* env, const grid::GridPoint& mino_position) {
 
-    pybind11::dict result{};
 
     auto mino_pos = mino_position.cast<uint8_t>();
 
-    auto python_x = pybind11::int_(mino_pos.x);
+    jobject java_x = construct_u8(env, mino_pos.x);
 
-    auto python_y = pybind11::int_(mino_pos.y);
+    jobject java_y = construct_u8(env, mino_pos.y);
 
-    std::vector<std::pair<std::string, pybind11::object>> properties_vector{
-        { "x", python_x },
-        { "y", python_y }
+    const auto [_, jmino_position] = construct_new_java_object<JMinoPosition>(env, java_x, java_y);
+
+    return jmino_position;
+}
+
+
+struct JTetrominoType {
+
+    static constexpr const char* java_class = JAVA_OOPETRIS_CLASS("TetrominoType");
+    static constexpr const char* java_type = TYPE_FOR_CLASS(JAVA_OOPETRIS_CLASS("TetrominoType"));
+
+    using native_type = jobject;
+
+    using enum_type = struct {
+        using enum_type = helper::TetrominoType;
+        static std::string value_to_string(helper::TetrominoType type) {
+            switch (type) {
+                case helper::TetrominoType::I: {
+                    return "I";
+                }
+                case helper::TetrominoType::J: {
+                    return "J";
+                }
+                case helper::TetrominoType::L: {
+                    return "L";
+                }
+                case helper::TetrominoType::O: {
+                    return "O";
+                }
+                case helper::TetrominoType::S: {
+                    return "S";
+                }
+                case helper::TetrominoType::T: {
+                    return "T";
+                }
+                case helper::TetrominoType::Z: {
+                    return "Z";
+                }
+                default:
+                    throw new std::runtime_error("UNREACHABLE");
+            }
+        }
     };
+};
 
-    for (const auto& [key, value] : properties_vector) {
-        result[pybind11::str(key)] = value;
-    }
+static_assert(IsJavaTypeDescriptionForEnum<JTetrominoType>);
 
-    return result;
+
+static jobject tetromino_type_to_java(JNIEnv* env, helper::TetrominoType type) {
+
+    return construct_new_java_enum<JTetrominoType>(env, type);
 }
 
-*/
-static const char* tetromino_type_to_string(helper::TetrominoType type) {
-    switch (type) {
-        case helper::TetrominoType::I: {
-            return "I";
-        }
-        case helper::TetrominoType::J: {
-            return "J";
-        }
-        case helper::TetrominoType::L: {
-            return "L";
-        }
-        case helper::TetrominoType::O: {
-            return "O";
-        }
-        case helper::TetrominoType::S: {
-            return "S";
-        }
-        case helper::TetrominoType::T: {
-            return "T";
-        }
-        case helper::TetrominoType::Z: {
-            return "Z";
-        }
-        default:
-            throw new std::runtime_error("UNREACHABLE");
-    }
-}
+struct JMino {
 
-static inline jstring tetromino_type_to_java_string(JNIEnv* env, helper::TetrominoType type) {
-    return JNI_get_jstring(env, tetromino_type_to_string(type));
-}
+    static constexpr const char* java_class = JAVA_OOPETRIS_CLASS("Mino");
+    static constexpr const char* java_type = TYPE_FOR_CLASS(JAVA_OOPETRIS_CLASS("Mino"));
 
-/*
+    using native_type = jobject;
 
-static pybind11::dict mino_to_java(const Mino& mino) {
-
-    pybind11::dict result{};
-
-    auto python_position = mino_position_to_java(mino.position());
-
-    auto python_type = tetromino_type_to_java_string(mino.type());
-
-    std::vector<std::pair<std::string, pybind11::object>> properties_vector{
-        { "position", python_position },
-        {     "type",     python_type }
+    using constructor = struct {
+        using inner = std::tuple<JMinoPosition, JTetrominoType>;
     };
+};
 
-    for (const auto& [key, value] : properties_vector) {
-        result[pybind11::str(key)] = value;
-    }
+static_assert(IsJavaTypeDescriptionForObject<JMino>);
+static_assert(JavaDescriptionHasConstructorType<JMino>);
 
-    return result;
+
+static jobject mino_to_java(JNIEnv* env, const Mino& mino) {
+
+
+    jobject java_position = mino_position_to_java(env, mino.position());
+
+    jobject java_type = tetromino_type_to_java(env, mino.type());
+
+    const auto [_, jmino] = construct_new_java_object<JMino>(env, java_position, java_type);
+
+    return jmino;
 }
 
 
-static pybind11::list mino_stack_to_java(const std::vector<Mino>& mino_stack) {
-    pybind11::list array{};
+static jobject mino_stack_to_java(JNIEnv* env, const std::vector<Mino>& mino_stack) {
+    JArrayList<JMino> list{ env, static_cast<jint>(mino_stack.size()) };
+
 
     for (auto& mino : mino_stack) {
-        array.append(mino_to_java(mino));
+        jboolean append_result = list.append(env, mino_to_java(env, mino));
+        if (append_result == JNI_FALSE) {
+            throw JavaException(ExceptionInInitializerError, "Error in appending to List<Mino>");
+        }
     }
 
-    return array;
+    return list.get_result();
 }
 
-*/
 
 struct JTetrionSnapshot {
 
@@ -261,46 +291,42 @@ struct JTetrionSnapshot {
     static constexpr const char* java_type = TYPE_FOR_CLASS(JAVA_OOPETRIS_CLASS("TetrionSnapshot"));
 
     using native_type = jobject;
+
+    using constructor = struct {
+        using inner = std::tuple<
+                JU32Description,
+                JU32Description,
+                JListDescription,
+                JU64Description,
+                JU64Description,
+                JU8Description>;
+    };
 };
+
+static_assert(IsJavaTypeDescriptionForObject<JTetrionSnapshot>);
+static_assert(JavaDescriptionHasConstructorType<JTetrionSnapshot>);
 
 
 static jobject snapshot_to_java(JNIEnv* env, const TetrionSnapshot& snapshot) {
 
-    /*  pybind11::dict result{};
+    auto jlevel = construct_u32(env, snapshot.level());
 
-    auto python_level = pybind11::int_(snapshot.level());
+    auto jlines_cleared = construct_u32(env, snapshot.lines_cleared());
 
-    auto python_lines_cleared = pybind11::int_(snapshot.lines_cleared());
+    auto jmino_stack = mino_stack_to_java(env, snapshot.mino_stack().minos());
 
-    auto python_mino_stack = mino_stack_to_java(snapshot.mino_stack().minos());
+    auto jscore = construct_u64(env, snapshot.score());
 
-    auto python_score = pybind11::int_(snapshot.score());
+    auto jsimulation_step_index = construct_u64(env, snapshot.simulation_step_index());
 
-    auto python_simulation_step_index = pybind11::int_(snapshot.simulation_step_index());
+    auto jtetrion_index = construct_u8(env, snapshot.tetrion_index());
 
-    auto python_tetrion_index = pybind11::int_(snapshot.tetrion_index());
 
-    std::vector<std::pair<std::string, pybind11::object>> properties_vector{
-        {                 "level",                 python_level },
-        {         "lines_cleared",         python_lines_cleared },
-        {            "mino_stack",            python_mino_stack },
-        {                 "score",                 python_score },
-        { "simulation_step_index", python_simulation_step_index },
-        {         "tetrion_index",         python_tetrion_index },
-    };
+    const auto [_, recording_information] = construct_new_java_object<JTetrionSnapshot>(
+            env, jlevel, jlines_cleared, jmino_stack, jscore, jsimulation_step_index, jtetrion_index
+    );
 
-    for (const auto& [key, value] : properties_vector) {
-        result[pybind11::str(key)] = value;
-    }
-
-    
-    return result; */
-    //TODO
-    UNUSED(tetromino_type_to_java_string);
-    //TODO
-    UNUSED(env);
-    UNUSED(snapshot);
-    return nullptr;
+    return recording_information;
 }
 
 
@@ -352,7 +378,6 @@ jobject recording_reader_to_java(JNIEnv* env, const recorder::RecordingReader& r
     auto jsnapshots = snapshots_to_java(env, reader.snapshots());
 
     auto jtetrion_headers = headers_to_java(env, reader.tetrion_headers());
-
 
     jobject jversion = construct_u8(env, recorder::Recording::current_supported_version_number);
 
