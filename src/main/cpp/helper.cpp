@@ -1,11 +1,17 @@
 
 
 #include "./helper.h"
+#include "./exceptions.h"
 
-#include <iostream>
+#include <core/helper/utils.hpp>
 
 
 //JNI DOCS: https://docs.oracle.com/en/java/javase/21/docs/specs/jni/functions.html
+
+[[noreturn]] void JNI_fatal_error(JNIEnv* env, std::string message) {
+    env->FatalError(message.c_str());
+    UNREACHABLE();
+}
 
 std::string JNI_jstring_to_string(JNIEnv* env, jstring j_str) {
     if (!j_str) {
@@ -33,7 +39,7 @@ std::string JNI_jstring_to_string(JNIEnv* env, jstring j_str) {
         throw JavaException(ExceptionInInitializerError, "Could not construct jstring");
     }
 
-    if (env->ExceptionOccurred() != nullptr) {
+    if (env->ExceptionCheck() == JNI_TRUE) {
         throw JavaExceptionAlreadyThrown();
     }
 
@@ -68,7 +74,7 @@ get_method_for_class(JNIEnv* env, jclass clazz, std::string method_name, std::st
         );
     }
 
-    if (env->ExceptionOccurred() != nullptr) {
+    if (env->ExceptionCheck() == JNI_TRUE) {
         throw JavaExceptionAlreadyThrown();
     }
 
@@ -84,7 +90,7 @@ get_method_for_class(JNIEnv* env, std::string class_name, std::string method_nam
         throw JavaException(NoClassDefFoundError, "No class with the name '" + class_name + "' found");
     }
 
-    if (env->ExceptionOccurred() != nullptr) {
+    if (env->ExceptionCheck() == JNI_TRUE) {
         throw JavaExceptionAlreadyThrown();
     }
 
@@ -102,7 +108,7 @@ get_static_field_for_class(JNIEnv* env, std::string class_name, std::string fiel
         throw JavaException(NoClassDefFoundError, "No class with the name '" + class_name + "' found");
     }
 
-    if (env->ExceptionOccurred() != nullptr) {
+    if (env->ExceptionCheck() == JNI_TRUE) {
         throw JavaExceptionAlreadyThrown();
     }
 
@@ -116,7 +122,7 @@ get_static_field_for_class(JNIEnv* env, std::string class_name, std::string fiel
         );
     }
 
-    if (env->ExceptionOccurred() != nullptr) {
+    if (env->ExceptionCheck() == JNI_TRUE) {
         throw JavaExceptionAlreadyThrown();
     }
 
@@ -137,7 +143,7 @@ std::pair<jclass, jmethodID> get_static_method_for_class(
         throw JavaException(NoClassDefFoundError, "No class with the name '" + class_name + "' found");
     }
 
-    if (env->ExceptionOccurred() != nullptr) {
+    if (env->ExceptionCheck() == JNI_TRUE) {
         throw JavaExceptionAlreadyThrown();
     }
 
@@ -151,7 +157,7 @@ std::pair<jclass, jmethodID> get_static_method_for_class(
         );
     }
 
-    if (env->ExceptionOccurred() != nullptr) {
+    if (env->ExceptionCheck() == JNI_TRUE) {
         throw JavaExceptionAlreadyThrown();
     }
 
@@ -172,7 +178,7 @@ jobject construct_u8(JNIEnv* env, u8 value) {
         throw JavaException(ExceptionInInitializerError, "Could not construct u8");
     }
 
-    if (env->ExceptionOccurred() != nullptr) {
+    if (env->ExceptionCheck() == JNI_TRUE) {
         throw JavaExceptionAlreadyThrown();
     }
 
@@ -193,7 +199,7 @@ jobject construct_u32(JNIEnv* env, u32 value) {
         throw JavaException(ExceptionInInitializerError, "Could not construct u32");
     }
 
-    if (env->ExceptionOccurred() != nullptr) {
+    if (env->ExceptionCheck() == JNI_TRUE) {
         throw JavaExceptionAlreadyThrown();
     }
 
@@ -213,60 +219,9 @@ jobject construct_u64(JNIEnv* env, u64 value) {
         throw JavaException(ExceptionInInitializerError, "Could not construct u64");
     }
 
-    if (env->ExceptionOccurred() != nullptr) {
+    if (env->ExceptionCheck() == JNI_TRUE) {
         throw JavaExceptionAlreadyThrown();
     }
 
     return u64_object;
 }
-
-
-JavaException::JavaException(std::string class_name)
-    : std::runtime_error{ "JavaException" },
-      m_class_name{ class_name },
-      m_message{ "" } { }
-
-JavaException::JavaException(std::string class_name, std::string message)
-    : std::runtime_error{ "JavaException" },
-      m_class_name{ class_name },
-      m_message{ message } { }
-
-void JavaException::throw_java_exception(JNIEnv* env) const {
-    JNI_throw_java_exception(env, this->m_class_name, this->m_message);
-}
-
-static void
-JNI_throw_java_exception_impl(JNIEnv* env, std::string class_name, std::string message, bool fatal_on_error) {
-
-
-    jclass found_class = env->FindClass(class_name.c_str());
-
-    if (found_class == nullptr || env->ExceptionOccurred() != nullptr) {
-        if (fatal_on_error) {
-            std::cerr << "FATAL: Couldn't find class '" << class_name << "' to throw a native Java exception!\n";
-            return;
-        }
-
-        JNI_throw_java_exception_impl(env, RuntimeException, message, true);
-        return;
-    }
-
-
-    jint result = env->ThrowNew(found_class, message.c_str());
-    if (result != JNI_OK) {
-        if (fatal_on_error) {
-            std::cerr << "FATAL: Couldn't throw a native Java exception: ThrowNew failed with code" << result << "\n";
-            return;
-        }
-
-        JNI_throw_java_exception_impl(env, RuntimeException, message, true);
-        return;
-    }
-}
-
-void JNI_throw_java_exception(JNIEnv* env, std::string class_name, std::string message) {
-    JNI_throw_java_exception_impl(env, class_name, message, false);
-}
-
-
-JavaExceptionAlreadyThrown::JavaExceptionAlreadyThrown() : std::runtime_error{ "JavaExceptionAlreadyThrown" } { }

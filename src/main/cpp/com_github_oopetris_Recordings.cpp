@@ -3,6 +3,7 @@
 #include "./com_github_oopetris_Recordings.h"
 #include "./convert.h"
 #include "./helper.h"
+#include "./jni_cpp.h"
 
 #include <core/core.hpp>
 #include <recordings/recordings.hpp>

@@ -3,6 +3,7 @@
 #include "./convert.h"
 
 #include "./helper.h"
+#include "./jni_cpp.h"
 #include "./list.h"
 #include "./map.h"
 
