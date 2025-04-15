@@ -3,6 +3,8 @@
 #pragma once
 
 #include "./helper.h"
+#include "./jni_cpp.h"
+#include "./stacktrace.h"
 
 template<typename T>
 concept IsJavaListImpl = IsJavaTypeDescriptionForObject<T> && requires(T) {
@@ -58,7 +60,6 @@ private:
 public:
     explicit JList(JNIEnv* env) {
 
-
         const auto [list_class, list_instance] =
                 construct_new_java_object_extended<ListImpl, ListConstructorEmpty>(env);
 
@@ -70,7 +71,6 @@ public:
     explicit JList(JNIEnv* env, jint initial_capacity)
         requires ListImpl::has_initial_capacity_constructor
     {
-
         const auto [list_class, list_instance] =
                 construct_new_java_object_extended<ListImpl, ListConstructorWithCapacity>(env, initial_capacity);
 
@@ -79,7 +79,7 @@ public:
     }
 
     [[nodiscard]] jboolean append(JNIEnv* env, T::native_type elem) {
-
+        STACK_TRACE_ADD(JAVA_LIST_CLASS, _stack_scope)
 
         const auto [_, list_add_function] =
                 get_method_for_class(env, m_class_impl, "add", method_type(T::java_type, BOOLEAN_LITERAL_TYPE));

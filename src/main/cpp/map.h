@@ -3,7 +3,7 @@
 
 #include "./helper.h"
 #include "./jni_cpp.h"
-
+#include "./stacktrace.h"
 
 template<typename T>
 concept IsJavaMapImpl = IsJavaTypeDescriptionForObject<T> && requires(T) {
@@ -79,6 +79,7 @@ public:
     }
 
     Value::native_type put(JNIEnv* env, Key::native_type key, Value::native_type value) {
+        STACK_TRACE_ADD(JAVA_MAP_CLASS, _stack_scope)
 
         std::string types = std::string{ Key::java_type } + METHOD_DECL_SEPERATOR + Value::java_type;
 
