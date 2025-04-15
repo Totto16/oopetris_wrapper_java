@@ -9,9 +9,9 @@
 
     // see https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/StackTraceElement.html#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,int)
 
-    jstring classLoaderName = JNI_get_jstring(env, JAVA_OOPETRIS_CLASS("Recordings"));
+    jstring classLoaderName = JNI_get_jstring(env, "native.cpp");
 
-    jstring moduleName = JNI_get_jstring(env, JAVA_OOPETRIS_CLASS_NAME);
+    jstring moduleName = JNI_get_jstring(env, JAVA_OOPETRIS_CLASS_NAME_WITH_DOTS);
 
     jstring moduleVersion = nullptr;
 
