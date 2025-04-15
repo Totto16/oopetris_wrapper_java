@@ -119,6 +119,8 @@ get_method_for_class(JNIEnv* env, jclass clazz, std::string method_name, std::st
 [[nodiscard]] std::pair<jclass, jmethodID>
 get_method_for_class(JNIEnv* env, std::string class_name, std::string method_name, std::string method_signature);
 
+[[nodiscard]] std::pair<jclass, jfieldID>
+get_static_field_for_class(JNIEnv* env, std::string class_name, std::string field_name, std::string field_type);
 
 [[nodiscard]] std::pair<jclass, jmethodID>
 get_static_method_for_class(JNIEnv* env, std::string class_name, std::string method_name, std::string method_signature);
@@ -149,7 +151,7 @@ public:
     explicit JavaExceptionAlreadyThrown();
 };
 
-// conecpts and templates
+// concepts and templates
 
 namespace details {
 
@@ -186,11 +188,11 @@ static_assert(not IsJavaTypeDescription<bool>);
 
 
 template<typename T>
-concept IsJavaTypeDescriptionForObject =
-        IsJavaTypeDescription<T> && requires(T) { std::is_same_v<typename T::native_type, jobject>; };
+concept IsJavaTypeDescriptionForObject = IsJavaTypeDescription<T> && requires(T) {
+    std::is_same_v<typename T::native_type, jobject>;
+} && details::IsJavaClassTypeDescription<T>;
 
 static_assert(not IsJavaTypeDescriptionForObject<bool>);
-
 
 namespace details {
 
@@ -315,6 +317,7 @@ std::pair<jclass, typename T::native_type> construct_new_java_object_extended(JN
         std::string error = "Could not construct '";
         error += T::java_class;
         error += "'";
+
         throw JavaException(ExceptionInInitializerError, error);
     }
 
@@ -329,6 +332,56 @@ template<typename T, typename... Args>
     requires IsJavaTypeDescriptionForObject<T> && JavaDescriptionHasConstructorType<T>
 std::pair<jclass, typename T::native_type> construct_new_java_object(JNIEnv* env, Args... args) {
     return construct_new_java_object_extended<T, bool, Args...>(env, args...);
+}
+
+
+template<typename T>
+concept IsJavaEnum = requires(T) {
+    typename T::enum_type;
+    std::is_enum_v<typename T::enum_type>;
+    requires requires(T::enum_type val) {
+        { T::value_to_string(val) } -> std::convertible_to<std::string>;
+    };
+};
+
+
+template<typename T>
+concept IsJavaTypeDescriptionForEnum =
+        IsJavaTypeDescriptionForObject<T> && requires { typename T::enum_type; } && IsJavaEnum<typename T::enum_type>;
+
+static_assert(not IsJavaTypeDescriptionForEnum<bool>);
+
+
+template<typename T>
+    requires IsJavaTypeDescriptionForEnum<T>
+T::native_type construct_new_java_enum(JNIEnv* env, typename T::enum_type::enum_type value) {
+
+    using EnumType = T::enum_type;
+    static_assert(IsJavaEnum<EnumType>);
+
+    std::string field_name = EnumType::value_to_string(value);
+
+    const auto [_t_class, _t_field_id] = get_static_field_for_class(env, T::java_class, field_name, "");
+
+
+    static_assert(std::is_same_v<typename T::native_type, jobject>);
+    jobject _t_field_value = env->GetStaticObjectField(_t_class, _t_field_id);
+
+    if (_t_field_value == nullptr) {
+        std::string error = "Could not get static field '";
+        error += field_name;
+        error += "' for class '";
+        error += T::java_class;
+        error += "'";
+
+        throw JavaException(RuntimeException, error);
+    }
+
+    if (env->ExceptionOccurred() != nullptr) {
+        throw JavaExceptionAlreadyThrown();
+    }
+
+    return _t_field_value;
 }
 
 
@@ -350,6 +403,26 @@ struct JU8Description {
 };
 
 static_assert(IsJavaTypeDescriptionForObject<JU8Description>);
+
+struct JU32Description {
+
+    static constexpr const char* java_class = U32_JAVA_CLASS;
+    static constexpr const char* java_type = U32_JAVA_TYPE;
+
+    using native_type = jobject;
+};
+
+static_assert(IsJavaTypeDescriptionForObject<JU32Description>);
+
+struct JU64Description {
+
+    static constexpr const char* java_class = U64_JAVA_CLASS;
+    static constexpr const char* java_type = U64_JAVA_TYPE;
+
+    using native_type = jobject;
+};
+
+static_assert(IsJavaTypeDescriptionForObject<JU64Description>);
 
 
 // list specific stuff

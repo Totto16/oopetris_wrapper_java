@@ -92,6 +92,38 @@ get_method_for_class(JNIEnv* env, std::string class_name, std::string method_nam
 }
 
 
+[[nodiscard]] std::pair<jclass, jfieldID>
+get_static_field_for_class(JNIEnv* env, std::string class_name, std::string field_name, std::string field_type) {
+
+
+    jclass found_class = env->FindClass(class_name.c_str());
+
+    if (found_class == nullptr) {
+        throw JavaException(NoClassDefFoundError, "No class with the name '" + class_name + "' found");
+    }
+
+    if (env->ExceptionOccurred() != nullptr) {
+        throw JavaExceptionAlreadyThrown();
+    }
+
+
+    jfieldID found_field_id = env->GetStaticFieldID(found_class, field_name.c_str(), field_type.c_str());
+
+    if (found_field_id == nullptr) {
+        throw JavaException(
+                NoSuchMethodError, "No static field with the name '" + field_name + "' and type '" + field_type
+                                           + "' found for the class: " + class_name
+        );
+    }
+
+    if (env->ExceptionOccurred() != nullptr) {
+        throw JavaExceptionAlreadyThrown();
+    }
+
+    return std::make_pair(found_class, found_field_id);
+}
+
+
 std::pair<jclass, jmethodID> get_static_method_for_class(
         JNIEnv* env,
         std::string class_name,
