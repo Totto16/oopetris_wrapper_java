@@ -102,6 +102,21 @@
 
 #define JAVA_HASHMAP_CLASS JAVA_UTIL_BASE_PACKAGE JAVA_CLASS_NAME_SEPERATOR "HashMap"
 
+#define JAVA_STRING_CLASS JAVA_LANG_BASE_PACKAGE JAVA_CLASS_NAME_SEPERATOR "String"
+
+#define JAVA_BOOLEAN_CLASS JAVA_LANG_BASE_PACKAGE JAVA_CLASS_NAME_SEPERATOR "Boolean"
+
+#define JAVA_FLOAT_CLASS JAVA_LANG_BASE_PACKAGE JAVA_CLASS_NAME_SEPERATOR "Float"
+
+#define JAVA_DOUBLE_CLASS JAVA_LANG_BASE_PACKAGE JAVA_CLASS_NAME_SEPERATOR "Double"
+
+#define JAVA_BYTE_CLASS JAVA_LANG_BASE_PACKAGE JAVA_CLASS_NAME_SEPERATOR "Byte"
+
+#define JAVA_INTEGER_CLASS JAVA_LANG_BASE_PACKAGE JAVA_CLASS_NAME_SEPERATOR "Integer"
+
+#define JAVA_LONG_CLASS JAVA_LANG_BASE_PACKAGE JAVA_CLASS_NAME_SEPERATOR "Long"
+
+
 // functions
 
 [[nodiscard]] std::string JNI_jstring_to_string(JNIEnv* env, jstring j_str);
@@ -387,12 +402,144 @@ T::native_type construct_new_java_enum(JNIEnv* env, typename T::enum_type::enum_
 
 // basic java type descriptions
 
-struct JIntDescription {
+
+struct JBoolLiteralDescription {
+    static constexpr const char* java_type = BOOLEAN_LITERAL_TYPE;
+    using native_type = jboolean;
+};
+
+static_assert(IsJavaTypeDescription<JBoolLiteralDescription>);
+
+
+struct JFloatLiteralDescription {
+    static constexpr const char* java_type = FLOAT_LITERAL_TYPE;
+    using native_type = jfloat;
+};
+
+static_assert(IsJavaTypeDescription<JFloatLiteralDescription>);
+
+struct JDoubleLiteralDescription {
+    static constexpr const char* java_type = FLOAT_LITERAL_TYPE;
+    using native_type = jdouble;
+};
+
+static_assert(IsJavaTypeDescription<JDoubleLiteralDescription>);
+
+struct JByteLiteralDescription {
+    static constexpr const char* java_type = BYTE_LITERAL_TYPE;
+    using native_type = jbyte;
+};
+
+static_assert(IsJavaTypeDescription<JByteLiteralDescription>);
+
+struct JIntLiteralDescription {
     static constexpr const char* java_type = INTEGER_LITERAL_TYPE;
     using native_type = jint;
 };
 
-static_assert(IsJavaTypeDescription<JIntDescription>);
+static_assert(IsJavaTypeDescription<JIntLiteralDescription>);
+
+struct JLongLiteralDescription {
+    static constexpr const char* java_type = LONG_LITERAL_TYPE;
+    using native_type = jlong;
+};
+
+static_assert(IsJavaTypeDescription<JLongLiteralDescription>);
+
+
+struct JStringDescription {
+    static constexpr const char* java_type = TYPE_FOR_CLASS(JAVA_STRING_CLASS);
+    static constexpr const char* java_class = JAVA_STRING_CLASS;
+
+    using native_type = jstring;
+};
+
+static_assert(IsJavaTypeDescription<JStringDescription>);
+
+// TODO: use valueOF static getter instead of Constructor() see e.g. https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Double.html#valueOf(double)
+struct JBooleanDescription {
+    static constexpr const char* java_type = TYPE_FOR_CLASS(JAVA_BOOLEAN_CLASS);
+    static constexpr const char* java_class = JAVA_BOOLEAN_CLASS;
+
+    using native_type = jobject;
+
+    using constructor = struct {
+        using inner = std::tuple<JBoolLiteralDescription>;
+    };
+};
+
+static_assert(IsJavaTypeDescription<JBooleanDescription>);
+static_assert(JavaDescriptionHasConstructorType<JBooleanDescription>);
+
+struct JFloatDescription {
+    static constexpr const char* java_type = TYPE_FOR_CLASS(JAVA_FLOAT_CLASS);
+    static constexpr const char* java_class = JAVA_FLOAT_CLASS;
+
+    using native_type = jobject;
+
+    using constructor = struct {
+        using inner = std::tuple<JFloatLiteralDescription>;
+    };
+};
+
+static_assert(IsJavaTypeDescription<JFloatDescription>);
+static_assert(JavaDescriptionHasConstructorType<JFloatDescription>);
+
+struct JDoubleDescription {
+    static constexpr const char* java_type = TYPE_FOR_CLASS(JAVA_DOUBLE_CLASS);
+    static constexpr const char* java_class = JAVA_DOUBLE_CLASS;
+
+    using native_type = jobject;
+
+    using constructor = struct {
+        using inner = std::tuple<JDoubleLiteralDescription>;
+    };
+};
+
+static_assert(IsJavaTypeDescription<JDoubleDescription>);
+static_assert(JavaDescriptionHasConstructorType<JDoubleDescription>);
+
+struct JByteDescription {
+    static constexpr const char* java_type = TYPE_FOR_CLASS(JAVA_BYTE_CLASS);
+    static constexpr const char* java_class = JAVA_BYTE_CLASS;
+
+    using native_type = jobject;
+
+    using constructor = struct {
+        using inner = std::tuple<JByteLiteralDescription>;
+    };
+};
+
+static_assert(IsJavaTypeDescription<JByteDescription>);
+static_assert(JavaDescriptionHasConstructorType<JByteDescription>);
+
+struct JIntegerDescription {
+    static constexpr const char* java_type = TYPE_FOR_CLASS(JAVA_INTEGER_CLASS);
+    static constexpr const char* java_class = JAVA_INTEGER_CLASS;
+
+    using native_type = jobject;
+
+    using constructor = struct {
+        using inner = std::tuple<JIntLiteralDescription>;
+    };
+};
+
+static_assert(IsJavaTypeDescription<JIntegerDescription>);
+static_assert(JavaDescriptionHasConstructorType<JIntegerDescription>);
+
+struct JLongDescription {
+    static constexpr const char* java_type = TYPE_FOR_CLASS(JAVA_LONG_CLASS);
+    static constexpr const char* java_class = JAVA_LONG_CLASS;
+
+    using native_type = jobject;
+
+    using constructor = struct {
+        using inner = std::tuple<JLongLiteralDescription>;
+    };
+};
+
+static_assert(IsJavaTypeDescription<JLongDescription>);
+static_assert(JavaDescriptionHasConstructorType<JLongDescription>);
 
 struct JU8Description {
 
@@ -455,7 +602,7 @@ static_assert(IsJavaConstructor<ListConstructorEmpty>);
 
 
 struct ListConstructorWithCapacity {
-    using inner = std::tuple<JIntDescription>;
+    using inner = std::tuple<JIntLiteralDescription>;
 };
 
 static_assert(IsJavaConstructor<ListConstructorWithCapacity>);
@@ -558,7 +705,7 @@ static_assert(IsJavaConstructor<MapConstructorEmpty>);
 
 
 struct MapConstructorWithCapacity {
-    using inner = std::tuple<JIntDescription>;
+    using inner = std::tuple<JIntLiteralDescription>;
 };
 
 static_assert(IsJavaConstructor<MapConstructorWithCapacity>);
@@ -605,10 +752,10 @@ public:
 
     Value::native_type put(JNIEnv* env, Key::native_type key, Value::native_type value) {
 
+        std::string types = std::string{ Key::java_type } + METHOD_DECL_SEPERATOR + Value::java_type;
 
-        const auto [_, map_put_function] = get_method_for_class(
-                env, m_class_impl, "put", method_type(Key::java_type + Value::java_type, Value::java_type)
-        );
+        const auto [_, map_put_function] =
+                get_method_for_class(env, m_class_impl, "put", method_type(types, Value::java_type));
 
         static_assert(std::is_same_v<typename Value::native_type, jobject>);
         jobject result = env->CallObjectMethod(m_instance, map_put_function, key, value);

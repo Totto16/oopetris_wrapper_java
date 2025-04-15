@@ -4,46 +4,209 @@
 
 #include "./helper.h"
 
-/* 
-static jobject information_value_to_java(const recorder::InformationValue& information_value) {
+
+struct JAdditionalInformationValue {
+
+    static constexpr const char* java_class = JAVA_OOPETRIS_CLASS("AdditionalInformationValue");
+    static constexpr const char* java_type = TYPE_FOR_CLASS(JAVA_OOPETRIS_CLASS("AdditionalInformationValue"));
+
+    using native_type = jobject;
+};
+
+static_assert(IsJavaTypeDescriptionForObject<JAdditionalInformationValue>);
+static_assert(not JavaDescriptionHasConstructorType<JAdditionalInformationValue>);
+
+struct JAdditionalInformationValueConstructorString {
+    using inner = std::tuple<JStringDescription>;
+};
+
+static_assert(IsJavaConstructor<JAdditionalInformationValueConstructorString>);
+
+struct JAdditionalInformationValueConstructorBoolean {
+    using inner = std::tuple<JBooleanDescription>;
+};
+
+static_assert(IsJavaConstructor<JAdditionalInformationValueConstructorBoolean>);
+
+struct JAdditionalInformationValueConstructorFloat {
+    using inner = std::tuple<JFloatDescription>;
+};
+
+static_assert(IsJavaConstructor<JAdditionalInformationValueConstructorFloat>);
+
+struct JAdditionalInformationValueConstructorDouble {
+    using inner = std::tuple<JDoubleDescription>;
+};
+
+static_assert(IsJavaConstructor<JAdditionalInformationValueConstructorDouble>);
+
+struct JAdditionalInformationValueConstructorU8 {
+    using inner = std::tuple<JU8Description>;
+};
+
+static_assert(IsJavaConstructor<JAdditionalInformationValueConstructorU8>);
+
+struct JAdditionalInformationValueConstructorI8 {
+    using inner = std::tuple<JByteDescription>;
+};
+
+static_assert(IsJavaConstructor<JAdditionalInformationValueConstructorI8>);
+
+struct JAdditionalInformationValueConstructorU32 {
+    using inner = std::tuple<JU32Description>;
+};
+
+static_assert(IsJavaConstructor<JAdditionalInformationValueConstructorU32>);
+
+struct JAdditionalInformationValueConstructorI32 {
+    using inner = std::tuple<JIntegerDescription>;
+};
+
+static_assert(IsJavaConstructor<JAdditionalInformationValueConstructorI32>);
+
+struct JAdditionalInformationValueConstructorU64 {
+    using inner = std::tuple<JU64Description>;
+};
+
+static_assert(IsJavaConstructor<JAdditionalInformationValueConstructorU64>);
+
+struct JAdditionalInformationValueConstructorI64 {
+    using inner = std::tuple<JLongDescription>;
+};
+
+static_assert(IsJavaConstructor<JAdditionalInformationValueConstructorI64>);
+
+struct JAdditionalInformationValueConstructorList {
+    using inner = std::tuple<JListDescription>;
+};
+
+static_assert(IsJavaConstructor<JAdditionalInformationValueConstructorList>);
+
+static jobject information_value_to_java(JNIEnv* env, const recorder::InformationValue& information_value) {
 
     return std::visit(
             helper::Overloaded{
-                    [](const std::string& value) -> jobject { return TODO; },
-                    [](const float& value) -> jobject { return TODO; },
-                    [](const double& value) -> jobject { return TODO; },
-                    [](const bool& value) -> jobject { return TODO; }, [](const u8& value) -> jobject { return TODO; },
-                    [](const i8& value) -> jobject { return TODO; }, [](const u32& value) -> jobject { return TODO; },
-                    [](const i32& value) -> jobject { return TODO; }, [](const u64& value) -> jobject { return TODO; },
-                    [](const i64& value) -> jobject { return TODO; },
-                    [](const std::vector<recorder::InformationValue>& values) -> jobject {
-                        pybind11::list array{};
+                    [&env](const std::string& value) -> jobject {
+                        jstring jstr = JNI_get_jstring(env, value);
+
+                        const auto [_, jinformation_value] = construct_new_java_object_extended<
+                                JAdditionalInformationValue, JAdditionalInformationValueConstructorString>(env, jstr);
+
+                        return jinformation_value;
+                    },
+                    [&env](const float& value) -> jobject {
+                        const auto [_, jvalue] =
+                                construct_new_java_object<JFloatDescription>(env, static_cast<jfloat>(value));
+
+                        const auto [_2, jinformation_value] = construct_new_java_object_extended<
+                                JAdditionalInformationValue, JAdditionalInformationValueConstructorFloat>(env, jvalue);
+
+                        return jinformation_value;
+                    },
+                    [&env](const double& value) -> jobject {
+                        const auto [_, jvalue] =
+                                construct_new_java_object<JDoubleDescription>(env, static_cast<jdouble>(value));
+
+                        const auto [_2, jinformation_value] = construct_new_java_object_extended<
+                                JAdditionalInformationValue, JAdditionalInformationValueConstructorDouble>(env, jvalue);
+
+                        return jinformation_value;
+                    },
+                    [&env](const bool& value) -> jobject {
+                        const auto [_, jvalue] =
+                                construct_new_java_object<JBooleanDescription>(env, static_cast<jboolean>(value));
+
+                        const auto [_2, jinformation_value] = construct_new_java_object_extended<
+                                JAdditionalInformationValue, JAdditionalInformationValueConstructorBoolean>(
+                                env, jvalue
+                        );
+
+                        return jinformation_value;
+                    },
+                    [&env](const u8& value) -> jobject {
+                        jobject u8_value = construct_u8(env, value);
+
+                        const auto [_, jinformation_value] = construct_new_java_object_extended<
+                                JAdditionalInformationValue, JAdditionalInformationValueConstructorU8>(env, u8_value);
+
+                        return jinformation_value;
+                    },
+                    [&env](const i8& value) -> jobject {
+                        const auto [_, jvalue] =
+                                construct_new_java_object<JByteDescription>(env, static_cast<jbyte>(value));
+
+                        const auto [_2, jinformation_value] = construct_new_java_object_extended<
+                                JAdditionalInformationValue, JAdditionalInformationValueConstructorI8>(env, jvalue);
+
+                        return jinformation_value;
+                    },
+                    [&env](const u32& value) -> jobject {
+                        jobject u32_value = construct_u32(env, value);
+
+                        const auto [_, jinformation_value] = construct_new_java_object_extended<
+                                JAdditionalInformationValue, JAdditionalInformationValueConstructorU32>(env, u32_value);
+
+                        return jinformation_value;
+                    },
+                    [&env](const i32& value) -> jobject {
+                        const auto [_, jvalue] =
+                                construct_new_java_object<JIntegerDescription>(env, static_cast<jint>(value));
+
+                        const auto [_2, jinformation_value] = construct_new_java_object_extended<
+                                JAdditionalInformationValue, JAdditionalInformationValueConstructorI32>(env, jvalue);
+
+                        return jinformation_value;
+                    },
+                    [&env](const u64& value) -> jobject {
+                        jobject u64_value = construct_u64(env, value);
+
+                        const auto [_, jinformation_value] = construct_new_java_object_extended<
+                                JAdditionalInformationValue, JAdditionalInformationValueConstructorU64>(env, u64_value);
+
+                        return jinformation_value;
+                    },
+                    [&env](const i64& value) -> jobject {
+                        const auto [_, jvalue] =
+                                construct_new_java_object<JLongDescription>(env, static_cast<jlong>(value));
+
+                        const auto [_2, jinformation_value] = construct_new_java_object_extended<
+                                JAdditionalInformationValue, JAdditionalInformationValueConstructorI64>(env, jvalue);
+
+                        return jinformation_value;
+                    },
+                    [&env](const std::vector<recorder::InformationValue>& values) -> jobject {
+                        JArrayList<JAdditionalInformationValue> list{ env, static_cast<jint>(values.size()) };
 
                         for (auto& value : values) {
-                            array.append(value);
+                            jboolean append_result = list.append(env, information_value_to_java(env, value));
+                            if (append_result == JNI_FALSE) {
+                                throw JavaException(
+                                        ExceptionInInitializerError,
+                                        "Error in appending to List<AdditionalInformationValue>"
+                                );
+                            }
                         }
 
-                        return array;
+                        return list.get_result();
                     } },
             information_value.underlying()
     );
 }
-*/
+
 static jobject information_to_java(JNIEnv* env, const recorder::AdditionalInformation& information) {
-    /* 
-    pybind11::dict result{};
+    JHashMap<JStringDescription, JAdditionalInformationValue> map{ env };
 
     for (const auto& [key, raw_value] : information) {
-        auto value = information_value_to_java(raw_value);
-        result[pybind11::str(key)] = value;
-    }
-    return result;
-    */
+        auto jvalue = information_value_to_java(env, raw_value);
 
-    //TODO
-    UNUSED(env);
-    UNUSED(information);
-    return nullptr;
+        jstring jkey = JNI_get_jstring(env, key);
+
+        // ignore return value, as it is already checked for null and otherwise just the same as jvalue
+        map.put(env, jkey, jvalue);
+    }
+
+
+    return map.get_result();
 }
 
 
@@ -138,7 +301,7 @@ static jobject records_to_java(JNIEnv* env, const std::vector<recorder::Record>&
     for (auto& record : records) {
         jboolean append_result = list.append(env, record_to_java(env, record));
         if (append_result == JNI_FALSE) {
-            throw JavaException(ExceptionInInitializerError, "Error in appending to List<Mino>");
+            throw JavaException(ExceptionInInitializerError, "Error in appending to List<TetrionRecord>");
         }
     }
 
@@ -180,7 +343,7 @@ static jobject headers_to_java(JNIEnv* env, const std::vector<recorder::TetrionH
     for (auto& header : headers) {
         jboolean append_result = list.append(env, header_to_java(env, header));
         if (append_result == JNI_FALSE) {
-            throw JavaException(ExceptionInInitializerError, "Error in appending to List<Mino>");
+            throw JavaException(ExceptionInInitializerError, "Error in appending to List<TetrionHeader>");
         }
     }
 
@@ -297,7 +460,6 @@ static jobject mino_to_java(JNIEnv* env, const Mino& mino) {
 static jobject mino_stack_to_java(JNIEnv* env, const std::vector<Mino>& mino_stack) {
     JArrayList<JMino> list{ env, static_cast<jint>(mino_stack.size()) };
 
-
     for (auto& mino : mino_stack) {
         jboolean append_result = list.append(env, mino_to_java(env, mino));
         if (append_result == JNI_FALSE) {
@@ -359,7 +521,6 @@ static_assert(IsJavaTypeDescriptionForObject<JTetrionSnapshot>);
 static jobject snapshots_to_java(JNIEnv* env, const std::vector<TetrionSnapshot>& snapshots) {
     JArrayList<JTetrionSnapshot> list{ env, static_cast<jint>(snapshots.size()) };
 
-
     for (auto& snapshot : snapshots) {
         jboolean append_result = list.append(env, snapshot_to_java(env, snapshot));
         if (append_result == JNI_FALSE) {
@@ -388,12 +549,6 @@ static_assert(JavaDescriptionHasConstructorType<JRecordingInformation>);
 
 
 jobject recording_reader_to_java(JNIEnv* env, const recorder::RecordingReader& reader) {
-
-    //TODO
-    /*    Map<String, AdditionalInformationValue> information;
-    List<TetrionRecord> records;
-    List<TetrionHeader> tetrionHeaders;
- */
 
     auto jinformation = information_to_java(env, reader.information());
 
