@@ -82,7 +82,7 @@ public:
         STACK_TRACE_ADD(JAVA_LIST_CLASS, _stack_scope)
 
         const auto [_, list_add_function] =
-                get_method_for_class(env, m_class_impl, "add", method_type(T::java_type, BOOLEAN_LITERAL_TYPE));
+                get_method_for_class(env, m_class_impl, "add", method_type(JObjectDescprition::java_type, BOOLEAN_LITERAL_TYPE));
 
 
         jboolean result = env->CallBooleanMethod(m_instance, list_add_function, elem);
