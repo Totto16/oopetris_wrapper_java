@@ -7,7 +7,7 @@
 #include "./helper.h"
 
 
-class JavaException : std::runtime_error {
+struct JavaException : public std::runtime_error {
 private:
     std::string m_class_name;
     std::string m_message;
@@ -22,7 +22,7 @@ public:
 void JNI_throw_java_exception(JNIEnv* env, std::string class_name, std::string message);
 
 
-class JavaExceptionAlreadyThrown : std::runtime_error {
+struct JavaExceptionAlreadyThrown : public  std::runtime_error {
 public:
     explicit JavaExceptionAlreadyThrown();
 };

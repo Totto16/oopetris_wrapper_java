@@ -70,7 +70,7 @@ public:
 
     [[nodiscard]] jobject to_java_stack_trace_element(JNIEnv* env) const;
 
-    static void add_stack_trace_to_throwable(JNIEnv* env, jthrowable throwable);
+    [[nodiscard]] static jthrowable add_stack_trace_to_throwable(JNIEnv* env, jthrowable throwable);
 };
 
 
