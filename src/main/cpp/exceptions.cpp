@@ -67,34 +67,41 @@ static void JNI_throw_java_exception_impl(
         return;
     }
 
-
-#ifndef NDEBUG
     if (add_cpp_stacktrace) {
-        // do this additional work only in debug mode
-        jthrowable thrown_exception = env->ExceptionOccurred();
-
-        if (thrown_exception != nullptr) {
-            // reset this exception
-            env->ExceptionClear();
-
-            // add stacktrace
-            jthrowable new_throwable = CPPStackTraceEntry::add_stack_trace_to_throwable(env, thrown_exception);
-
-            jint result = env->Throw(new_throwable);
-
-            if (result != JNI_OK) {
-                std::string fatal_error = "Couldn't throw a native Java exception: Throw failed with code";
-                fatal_error += result;
-
-                JNI_fatal_error(env, fatal_error);
-            }
-        }
+        JNI_add_stack_trace_to_exception(env);
     }
-#endif
 }
 
 void JNI_throw_java_exception(JNIEnv* env, std::string class_name, std::string message) {
     JNI_throw_java_exception_impl(env, class_name, message, false, true);
+}
+
+void JNI_add_stack_trace_to_exception(JNIEnv* env) {
+
+
+#ifndef NDEBUG
+    // do this additional work only in debug mode
+    jthrowable thrown_exception = env->ExceptionOccurred();
+
+    if (thrown_exception != nullptr) {
+        // reset this exception
+        env->ExceptionClear();
+
+        // add stacktrace
+        jthrowable new_throwable = CPPStackTraceEntry::add_stack_trace_to_throwable(env, thrown_exception);
+
+        jint result = env->Throw(new_throwable);
+
+        if (result != JNI_OK) {
+            std::string fatal_error = "Couldn't throw a native Java exception: Throw failed with code";
+            fatal_error += result;
+
+            JNI_fatal_error(env, fatal_error);
+        }
+    }
+#else
+    UNUSED(env);
+#endif
 }
 
 

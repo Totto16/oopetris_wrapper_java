@@ -2,6 +2,7 @@
 #pragma once
 
 #include "./helper.h"
+#include "./jni_cpp.h"
 
 
 template<typename T>

@@ -22,6 +22,7 @@
         return error_return_value;                                             \
     }                                                                          \
     catch (const JavaExceptionAlreadyThrown& _) {                              \
+        JNI_add_stack_trace_to_exception(env);                                 \
         return error_return_value;                                             \
     }                                                                          \
     catch (const std::runtime_error& raw_exception) {                          \

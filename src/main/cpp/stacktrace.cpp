@@ -5,7 +5,6 @@
 #include <optional>
 #include <vector>
 
-
 [[nodiscard]] jobject CPPStackTraceEntry::to_java_stack_trace_element(JNIEnv* env) const {
 
     // see https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/StackTraceElement.html#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,int)
@@ -94,7 +93,7 @@ jthrowable CPPStackTraceEntry::add_stack_trace_to_throwable(JNIEnv* env, jthrowa
 
     std::string stack_trace_element_array_type = std::string{TYPE_FOR_ARRAY(})+JStackTraceElement::java_type;
 
-    const auto [_, get_stack_trace_function] = get_method_for_class(
+    const auto [jthrowable_class, get_stack_trace_function] = get_method_for_class(
             env, JThrowable::java_class, "getStackTrace", method_type("", stack_trace_element_array_type)
     );
 
@@ -149,7 +148,7 @@ jthrowable CPPStackTraceEntry::add_stack_trace_to_throwable(JNIEnv* env, jthrowa
     // set the value
 
     const auto [_2, set_stack_trace_function] = get_method_for_class(
-            env, JThrowable::java_class, "setStackTrace", method_type(stack_trace_element_array_type, VOID_LITERAL_TYPE)
+            env, jthrowable_class, "setStackTrace", method_type(stack_trace_element_array_type, VOID_LITERAL_TYPE)
     );
 
     env->CallVoidMethod(throwable, set_stack_trace_function, new_stack_trace_array);
