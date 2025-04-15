@@ -78,7 +78,10 @@ public:
         m_instance = map_instance;
     }
 
-    Value::native_type put(JNIEnv* env, Key::native_type key, Value::native_type value) {
+    /**
+     * returns the previous value (might be null) 
+     */
+    Value::native_type put(JNIEnv* env, Key::native_type key, Value::native_type value, bool allow_replace) {
         STACK_TRACE_ADD(JAVA_MAP_CLASS, _stack_scope)
 
         std::string types =
@@ -94,8 +97,12 @@ public:
             throw JavaExceptionAlreadyThrown();
         }
 
-        if (result == nullptr) {
-            throw JavaException(RuntimeException, "Error in call to Map::put");
+        // the result is the previous value, which we we report as error, if replace is off
+        if (result != nullptr && not allow_replace) {
+            throw JavaException(
+                    IllegalStateException,
+                    "Error in call to Map::put, replace is not allowed, but the put replaced a value"
+            );
         }
 
         return result;

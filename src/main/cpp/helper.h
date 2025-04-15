@@ -98,6 +98,8 @@
 
 #define FileNotFoundException JAVA_IO_BASE_PACKAGE JAVA_CLASS_NAME_SEPERATOR "FileNotFoundException"
 
+#define IllegalStateException JAVA_LANG_BASE_PACKAGE JAVA_CLASS_NAME_SEPERATOR "IllegalStateException"
+
 // classes
 
 #define JAVA_LIST_CLASS JAVA_UTIL_BASE_PACKAGE JAVA_CLASS_NAME_SEPERATOR "List"

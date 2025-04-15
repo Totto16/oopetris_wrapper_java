@@ -233,7 +233,7 @@ static jobject information_to_java(JNIEnv* env, const recorder::AdditionalInform
         jstring jkey = JNI_get_jstring(env, key);
 
         // ignore return value, as it is already checked for null and otherwise just the same as jvalue
-        map.put(env, jkey, jvalue);
+        map.put(env, jkey, jvalue, false);
     }
 
 
