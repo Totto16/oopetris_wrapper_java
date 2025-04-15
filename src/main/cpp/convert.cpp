@@ -46,120 +46,145 @@ static jobject information_to_java(JNIEnv* env, const recorder::AdditionalInform
     return nullptr;
 }
 
-/*
-const char* event_to_string(InputEvent event) {
-    switch (event) {
-        case InputEvent::RotateLeftPressed:
-            return "RotateLeftPressed";
-        case InputEvent::RotateRightPressed:
-            return "RotateRightPressed";
-        case InputEvent::MoveLeftPressed:
-            return "MoveLeftPressed";
-        case InputEvent::MoveRightPressed:
-            return "MoveRightPressed";
-        case InputEvent::MoveDownPressed:
-            return "MoveDownPressed";
-        case InputEvent::DropPressed:
-            return "DropPressed";
-        case InputEvent::HoldPressed:
-            return "HoldPressed";
-        case InputEvent::RotateLeftReleased:
-            return "RotateLeftReleased";
-        case InputEvent::RotateRightReleased:
-            return "RotateRightReleased";
-        case InputEvent::MoveLeftReleased:
-            return "MoveLeftReleased";
-        case InputEvent::MoveRightReleased:
-            return "MoveRightReleased";
-        case InputEvent::MoveDownReleased:
-            return "MoveDownReleased";
-        case InputEvent::DropReleased:
-            return "DropReleased";
-        case InputEvent::HoldReleased:
-            return "HoldReleased";
-        default:
-            throw new std::runtime_error("UNREACHABLE");
-    }
-}
 
-static inline pybind11::str event_to_java_string(InputEvent event) {
-    return pybind11::str(event_to_string(event));
-}
+struct JInputEvent {
 
+    static constexpr const char* java_class = JAVA_OOPETRIS_CLASS("InputEvent");
+    static constexpr const char* java_type = TYPE_FOR_CLASS(JAVA_OOPETRIS_CLASS("InputEvent"));
 
-static pybind11::dict record_to_java(const recorder::Record& record) {
+    using native_type = jobject;
 
-    pybind11::dict result{};
-
-    auto python_event = event_to_java_string(record.event);
-
-    auto python_simulation_step_index = pybind11::int_(record.simulation_step_index);
-
-    auto python_tetrion_index = pybind11::int_(record.tetrion_index);
-
-    std::vector<std::pair<std::string, pybind11::object>> properties_vector{
-        {                 "event",                 python_event },
-        { "simulation_step_index", python_simulation_step_index },
-        {         "tetrion_index",         python_tetrion_index }
+    using enum_type = struct {
+        using enum_type = InputEvent;
+        static std::string value_to_string(InputEvent event) {
+            switch (event) {
+                case InputEvent::RotateLeftPressed:
+                    return "RotateLeftPressed";
+                case InputEvent::RotateRightPressed:
+                    return "RotateRightPressed";
+                case InputEvent::MoveLeftPressed:
+                    return "MoveLeftPressed";
+                case InputEvent::MoveRightPressed:
+                    return "MoveRightPressed";
+                case InputEvent::MoveDownPressed:
+                    return "MoveDownPressed";
+                case InputEvent::DropPressed:
+                    return "DropPressed";
+                case InputEvent::HoldPressed:
+                    return "HoldPressed";
+                case InputEvent::RotateLeftReleased:
+                    return "RotateLeftReleased";
+                case InputEvent::RotateRightReleased:
+                    return "RotateRightReleased";
+                case InputEvent::MoveLeftReleased:
+                    return "MoveLeftReleased";
+                case InputEvent::MoveRightReleased:
+                    return "MoveRightReleased";
+                case InputEvent::MoveDownReleased:
+                    return "MoveDownReleased";
+                case InputEvent::DropReleased:
+                    return "DropReleased";
+                case InputEvent::HoldReleased:
+                    return "HoldReleased";
+                default:
+                    throw new std::runtime_error("UNREACHABLE");
+            }
+        }
     };
+};
 
-    for (const auto& [key, value] : properties_vector) {
-        result[pybind11::str(key)] = value;
-    }
+static_assert(IsJavaTypeDescriptionForEnum<JInputEvent>);
 
-    return result;
+static jobject event_to_java(JNIEnv* env, InputEvent event) {
+    return construct_new_java_enum<JInputEvent>(env, event);
 }
-*/
+
+
+struct JTetrionRecord {
+
+    static constexpr const char* java_class = JAVA_OOPETRIS_CLASS("TetrionRecord");
+    static constexpr const char* java_type = TYPE_FOR_CLASS(JAVA_OOPETRIS_CLASS("TetrionRecord"));
+
+    using native_type = jobject;
+
+    using constructor = struct {
+        using inner = std::tuple<JInputEvent, JU64Description, JU8Description>;
+    };
+};
+
+static_assert(IsJavaTypeDescriptionForObject<JTetrionRecord>);
+static_assert(JavaDescriptionHasConstructorType<JTetrionRecord>);
+
+
+static jobject record_to_java(JNIEnv* env, const recorder::Record& record) {
+
+
+    jobject java_event = event_to_java(env, record.event);
+
+    jobject java_simulation_step_index = construct_u64(env, record.simulation_step_index);
+
+    jobject java_tetrion_index = construct_u8(env, record.tetrion_index);
+
+    const auto [_, jrecord] =
+            construct_new_java_object<JTetrionRecord>(env, java_event, java_simulation_step_index, java_tetrion_index);
+
+    return jrecord;
+}
+
+
 static jobject records_to_java(JNIEnv* env, const std::vector<recorder::Record>& records) {
-    /*  pybind11::list array{};
+    JArrayList<JTetrionRecord> list{ env, static_cast<jint>(records.size()) };
 
     for (auto& record : records) {
-        array.append(record_to_java(record));
+        jboolean append_result = list.append(env, record_to_java(env, record));
+        if (append_result == JNI_FALSE) {
+            throw JavaException(ExceptionInInitializerError, "Error in appending to List<Mino>");
+        }
     }
 
-    return array; */
-    //TODO
-    UNUSED(env);
-    UNUSED(records);
-    return nullptr;
+    return list.get_result();
 }
-/*
 
-static pybind11::dict header_to_java(const recorder::TetrionHeader& header) {
 
-    pybind11::dict result{};
+struct JTetrionHeader {
 
-    auto python_seed = pybind11::int_(header.seed);
+    static constexpr const char* java_class = JAVA_OOPETRIS_CLASS("TetrionHeader");
+    static constexpr const char* java_type = TYPE_FOR_CLASS(JAVA_OOPETRIS_CLASS("TetrionHeader"));
 
-    auto python_starting_level = pybind11::int_(header.starting_level);
+    using native_type = jobject;
 
-    std::vector<std::pair<std::string, pybind11::object>> properties_vector{
-        {           "seed",           python_seed },
-        { "starting_level", python_starting_level },
+    using constructor = struct {
+        using inner = std::tuple<JU64Description, JU32Description>;
     };
+};
 
-    for (const auto& [key, value] : properties_vector) {
-        result[pybind11::str(key)] = value;
-    }
+static_assert(IsJavaTypeDescriptionForObject<JTetrionHeader>);
+static_assert(JavaDescriptionHasConstructorType<JTetrionHeader>);
 
-    return result;
+
+static jobject header_to_java(JNIEnv* env, const recorder::TetrionHeader& header) {
+
+    jobject java_seed = construct_u64(env, header.seed);
+
+    jobject java_starting_level = construct_u32(env, header.starting_level);
+
+    const auto [_, jheader] = construct_new_java_object<JTetrionHeader>(env, java_seed, java_starting_level);
+
+    return jheader;
 }
 
 
-*/
 static jobject headers_to_java(JNIEnv* env, const std::vector<recorder::TetrionHeader>& headers) {
-    /*  pybind11::list array{};
+    JArrayList<JTetrionHeader> list{ env, static_cast<jint>(headers.size()) };
 
     for (auto& header : headers) {
-        array.append(header_to_java(header));
+        jboolean append_result = list.append(env, header_to_java(env, header));
+        if (append_result == JNI_FALSE) {
+            throw JavaException(ExceptionInInitializerError, "Error in appending to List<Mino>");
+        }
     }
 
-    return array; */
-
-    //TODO
-    UNUSED(env);
-    UNUSED(headers);
-    return nullptr;
+    return list.get_result();
 }
 
 
@@ -180,7 +205,6 @@ static_assert(JavaDescriptionHasConstructorType<JMinoPosition>);
 
 
 static jobject mino_position_to_java(JNIEnv* env, const grid::GridPoint& mino_position) {
-
 
     auto mino_pos = mino_position.cast<uint8_t>();
 
