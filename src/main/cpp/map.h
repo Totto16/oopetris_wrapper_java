@@ -81,10 +81,11 @@ public:
     Value::native_type put(JNIEnv* env, Key::native_type key, Value::native_type value) {
         STACK_TRACE_ADD(JAVA_MAP_CLASS, _stack_scope)
 
-        std::string types = std::string{ Key::java_type } + METHOD_DECL_SEPERATOR + Value::java_type;
+        std::string types =
+                std::string{ JObjectDescprition::java_type } + METHOD_DECL_SEPERATOR + JObjectDescprition::java_type;
 
         const auto [_, map_put_function] =
-                get_method_for_class(env, m_class_impl, "put", method_type(types, Value::java_type));
+                get_method_for_class(env, m_class_impl, "put", method_type(types, JObjectDescprition::java_type));
 
         static_assert(std::is_same_v<typename Value::native_type, jobject>);
         jobject result = env->CallObjectMethod(m_instance, map_put_function, key, value);

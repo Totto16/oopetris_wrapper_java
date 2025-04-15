@@ -381,6 +381,17 @@ struct JLongDescription {
 static_assert(IsJavaTypeDescription<JLongDescription>);
 static_assert(JavaDescriptionHasConstructorType<JLongDescription>);
 
+
+struct JObjectDescprition {
+    static constexpr const char* java_type = TYPE_FOR_CLASS(JAVA_OBJECT_CLASS);
+    static constexpr const char* java_class = JAVA_OBJECT_CLASS;
+
+    using native_type = jobject;
+};
+
+static_assert(IsJavaTypeDescription<JObjectDescprition>);
+
+
 struct JU8Description {
 
     static constexpr const char* java_class = U8_JAVA_CLASS;
