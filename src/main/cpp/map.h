@@ -91,7 +91,7 @@ public:
             throw JavaException(RuntimeException, "Error in call to Map::put");
         }
 
-        if (env->ExceptionOccurred() != nullptr) {
+        if (env->ExceptionCheck() == JNI_TRUE) {
             throw JavaExceptionAlreadyThrown();
         }
 

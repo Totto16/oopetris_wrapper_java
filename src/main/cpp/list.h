@@ -87,7 +87,7 @@ public:
 
         jboolean result = env->CallBooleanMethod(m_instance, list_add_function, elem);
 
-        if (env->ExceptionOccurred() != nullptr) {
+        if (env->ExceptionCheck() == JNI_TRUE) {
             throw JavaExceptionAlreadyThrown();
         }
 
