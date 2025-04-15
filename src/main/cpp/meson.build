@@ -24,10 +24,15 @@ src_files += files(
     'com_github_oopetris_Recordings.h',
     'convert.cpp',
     'convert.h',
+    'exceptions.cpp',
+    'exceptions.h',
     'helper.cpp',
     'helper.h',
+    'jni_cpp.h',
     'list.h',
     'map.h',
+    'stacktrace.cpp',
+    'stacktrace.h',
 )
 
 subdir('tools')
