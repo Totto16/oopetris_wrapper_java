@@ -67,9 +67,9 @@ jobs:
         run: |
           brew update
           brew install llvm@19 lld@19
-          echo "$(brew --prefix)/opt/llvm/bin" >> $GITHUB_PATH
-          echo "LDFLAGS=-L$(brew --prefix)/opt/llvm/lib -L$(brew --prefix)/opt/llvm/lib/c++ -Wl,-rpath,$(brew --prefix)/opt/llvm/lib/c++" >> "$GITHUB_ENV"
-          echo "CPPFLAGS=-I$(brew --prefix)/opt/llvm/include" >> "$GITHUB_ENV"
+          echo "$(brew --prefix)/opt/llvm@19/bin:$(brew --prefix)/opt/lld@19/bin" >> $GITHUB_PATH
+          echo "LDFLAGS=-L$(brew --prefix)/opt/llvm@19/lib -L$(brew --prefix)/opt/llvm@19/lib/c++ -Wl,-rpath,$(brew --prefix)/opt/llvm@19/lib/c++ -L$(brew --prefix)/opt/lld@19/lib" >> "$GITHUB_ENV"
+          echo "CPPFLAGS=-I$(brew --prefix)/opt/llvm@19/include -I$(brew --prefix)/opt/lld@19/include" >> "$GITHUB_ENV"
           echo "CC=clang" >> "$GITHUB_ENV"
           echo "CXX=clang++" >> "$GITHUB_ENV"
           echo "OBJC=clang" >> "$GITHUB_ENV"
