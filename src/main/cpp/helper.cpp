@@ -35,12 +35,12 @@ std::string JNI_jstring_to_string(JNIEnv* env, jstring j_str) {
 [[nodiscard]] static jstring _impl_JNI_get_jstring(JNIEnv* env, const char* c_str) {
     jstring result = env->NewStringUTF(c_str);
 
-    if (result == nullptr) {
-        throw JavaException(ExceptionInInitializerError, "Could not construct jstring");
-    }
-
     if (env->ExceptionCheck() == JNI_TRUE) {
         throw JavaExceptionAlreadyThrown();
+    }
+
+    if (result == nullptr) {
+        throw JavaException(ExceptionInInitializerError, "Could not construct jstring");
     }
 
     return result;
@@ -66,17 +66,16 @@ get_method_for_class(JNIEnv* env, jclass clazz, std::string method_name, std::st
 
     jmethodID found_method = env->GetMethodID(clazz, method_name.c_str(), method_signature.c_str());
 
+    if (env->ExceptionCheck() == JNI_TRUE) {
+        throw JavaExceptionAlreadyThrown();
+    }
+
     if (found_method == nullptr) {
         throw JavaException(
                 NoSuchMethodError,
                 "No method with the name '" + method_name + "' and signature '" + method_signature + "' found!"
         );
     }
-
-    if (env->ExceptionCheck() == JNI_TRUE) {
-        throw JavaExceptionAlreadyThrown();
-    }
-
     return std::make_pair(clazz, found_method);
 }
 
@@ -85,12 +84,12 @@ get_method_for_class(JNIEnv* env, std::string class_name, std::string method_nam
 
     jclass found_class = env->FindClass(class_name.c_str());
 
-    if (found_class == nullptr) {
-        throw JavaException(NoClassDefFoundError, "No class with the name '" + class_name + "' found");
-    }
-
     if (env->ExceptionCheck() == JNI_TRUE) {
         throw JavaExceptionAlreadyThrown();
+    }
+
+    if (found_class == nullptr) {
+        throw JavaException(NoClassDefFoundError, "No class with the name '" + class_name + "' found");
     }
 
     return get_method_for_class(env, found_class, method_name, method_signature);
@@ -103,26 +102,25 @@ get_static_field_for_class(JNIEnv* env, std::string class_name, std::string fiel
 
     jclass found_class = env->FindClass(class_name.c_str());
 
-    if (found_class == nullptr) {
-        throw JavaException(NoClassDefFoundError, "No class with the name '" + class_name + "' found");
-    }
-
     if (env->ExceptionCheck() == JNI_TRUE) {
         throw JavaExceptionAlreadyThrown();
     }
 
+    if (found_class == nullptr) {
+        throw JavaException(NoClassDefFoundError, "No class with the name '" + class_name + "' found");
+    }
 
     jfieldID found_field_id = env->GetStaticFieldID(found_class, field_name.c_str(), field_type.c_str());
+
+    if (env->ExceptionCheck() == JNI_TRUE) {
+        throw JavaExceptionAlreadyThrown();
+    }
 
     if (found_field_id == nullptr) {
         throw JavaException(
                 NoSuchMethodError, "No static field with the name '" + field_name + "' and type '" + field_type
                                            + "' found for the class: " + class_name
         );
-    }
-
-    if (env->ExceptionCheck() == JNI_TRUE) {
-        throw JavaExceptionAlreadyThrown();
     }
 
     return std::make_pair(found_class, found_field_id);
@@ -138,26 +136,25 @@ std::pair<jclass, jmethodID> get_static_method_for_class(
 
     jclass found_class = env->FindClass(class_name.c_str());
 
-    if (found_class == nullptr) {
-        throw JavaException(NoClassDefFoundError, "No class with the name '" + class_name + "' found");
-    }
-
     if (env->ExceptionCheck() == JNI_TRUE) {
         throw JavaExceptionAlreadyThrown();
     }
 
+    if (found_class == nullptr) {
+        throw JavaException(NoClassDefFoundError, "No class with the name '" + class_name + "' found");
+    }
 
     jmethodID found_method = env->GetStaticMethodID(found_class, method_name.c_str(), method_signature.c_str());
+
+    if (env->ExceptionCheck() == JNI_TRUE) {
+        throw JavaExceptionAlreadyThrown();
+    }
 
     if (found_method == nullptr) {
         throw JavaException(
                 NoSuchMethodError, "No static method with the name '" + method_name + "' and signature '"
                                            + method_signature + "' found for the class: " + class_name
         );
-    }
-
-    if (env->ExceptionCheck() == JNI_TRUE) {
-        throw JavaExceptionAlreadyThrown();
     }
 
     return std::make_pair(found_class, found_method);
@@ -173,12 +170,12 @@ jobject construct_u8(JNIEnv* env, u8 value) {
 
     jobject u8_object = env->CallStaticObjectMethod(u8_class, u8_static_create_function, u8_value);
 
-    if (u8_object == nullptr) {
-        throw JavaException(ExceptionInInitializerError, "Could not construct u8");
-    }
-
     if (env->ExceptionCheck() == JNI_TRUE) {
         throw JavaExceptionAlreadyThrown();
+    }
+
+    if (u8_object == nullptr) {
+        throw JavaException(ExceptionInInitializerError, "Could not construct u8");
     }
 
     return u8_object;
@@ -194,12 +191,12 @@ jobject construct_u32(JNIEnv* env, u32 value) {
 
     jobject u32_object = env->CallStaticObjectMethod(u32_class, u32_static_create_function, u32_value);
 
-    if (u32_object == nullptr) {
-        throw JavaException(ExceptionInInitializerError, "Could not construct u32");
-    }
-
     if (env->ExceptionCheck() == JNI_TRUE) {
         throw JavaExceptionAlreadyThrown();
+    }
+
+    if (u32_object == nullptr) {
+        throw JavaException(ExceptionInInitializerError, "Could not construct u32");
     }
 
     return u32_object;
@@ -214,12 +211,12 @@ jobject construct_u64(JNIEnv* env, u64 value) {
 
     jobject u64_object = env->CallStaticObjectMethod(u64_class, u64_static_create_function, u64_value);
 
-    if (u64_object == nullptr) {
-        throw JavaException(ExceptionInInitializerError, "Could not construct u64");
-    }
-
     if (env->ExceptionCheck() == JNI_TRUE) {
         throw JavaExceptionAlreadyThrown();
+    }
+
+    if (u64_object == nullptr) {
+        throw JavaException(ExceptionInInitializerError, "Could not construct u64");
     }
 
     return u64_object;

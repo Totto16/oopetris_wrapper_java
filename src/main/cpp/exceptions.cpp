@@ -29,29 +29,41 @@ static void JNI_throw_java_exception_impl(
     jclass found_class = env->FindClass(class_name.c_str());
 
     if (found_class == nullptr || env->ExceptionCheck() == JNI_TRUE) {
+
         if (fatal_on_error) {
-            std::string fatal_error = "FATAL: Couldn't find class '";
+            std::string fatal_error = "Couldn't find class '";
             fatal_error += class_name;
-            fatal_error += "' to throw a native Java exception!";
+            fatal_error += "' to throw a native Java exception of that class!";
 
             JNI_fatal_error(env, fatal_error);
         }
 
-        JNI_throw_java_exception_impl(env, RuntimeException, message, true, true);
+        // clear the ignored java excrption
+        if (env->ExceptionCheck() == JNI_TRUE) {
+            env->ExceptionClear();
+        }
+
+        JNI_throw_java_exception_impl(env, RuntimeException, message, true, add_cpp_stacktrace);
         return;
     }
 
 
     jint result = env->ThrowNew(found_class, message.c_str());
     if (result != JNI_OK) {
+
         if (fatal_on_error) {
-            std::string fatal_error = "FATAL: Couldn't throw a native Java exception: ThrowNew failed with code";
+            std::string fatal_error = "Couldn't throw a native Java exception: ThrowNew failed with code";
             fatal_error += result;
 
             JNI_fatal_error(env, fatal_error);
         }
 
-        JNI_throw_java_exception_impl(env, RuntimeException, message, true, true);
+        // clear the ignored java excrption
+        if (env->ExceptionCheck() == JNI_TRUE) {
+            env->ExceptionClear();
+        }
+
+        JNI_throw_java_exception_impl(env, RuntimeException, message, true, add_cpp_stacktrace);
         return;
     }
 
@@ -60,7 +72,6 @@ static void JNI_throw_java_exception_impl(
     if (add_cpp_stacktrace) {
         // do this additional work only in debug mode
         jthrowable thrown_exception = env->ExceptionOccurred();
-
 
         if (thrown_exception != nullptr) {
             // reset this exception
@@ -72,7 +83,7 @@ static void JNI_throw_java_exception_impl(
             jint result = env->Throw(new_throwable);
 
             if (result != JNI_OK) {
-                std::string fatal_error = "FATAL: Couldn't throw a native Java exception: Throw failed with code";
+                std::string fatal_error = "Couldn't throw a native Java exception: Throw failed with code";
                 fatal_error += result;
 
                 JNI_fatal_error(env, fatal_error);

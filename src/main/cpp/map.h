@@ -87,12 +87,12 @@ public:
         static_assert(std::is_same_v<typename Value::native_type, jobject>);
         jobject result = env->CallObjectMethod(m_instance, map_put_function, key, value);
 
-        if (result == nullptr) {
-            throw JavaException(RuntimeException, "Error in call to Map::put");
-        }
-
         if (env->ExceptionCheck() == JNI_TRUE) {
             throw JavaExceptionAlreadyThrown();
+        }
+
+        if (result == nullptr) {
+            throw JavaException(RuntimeException, "Error in call to Map::put");
         }
 
         return result;

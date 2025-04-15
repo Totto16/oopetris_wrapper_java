@@ -168,16 +168,16 @@ std::pair<jclass, typename T::native_type> construct_new_java_object_extended(JN
 
     jobject _object_instance = env->NewObject(_t_class, _t_constructor, args...);
 
+    if (env->ExceptionCheck() == JNI_TRUE) {
+        throw JavaExceptionAlreadyThrown();
+    }
+
     if (_object_instance == nullptr) {
         std::string error = "Could not construct '";
         error += T::java_class;
         error += "'";
 
         throw JavaException(ExceptionInInitializerError, error);
-    }
-
-    if (env->ExceptionCheck() == JNI_TRUE) {
-        throw JavaExceptionAlreadyThrown();
     }
 
     return std::make_pair(_t_class, _object_instance);
@@ -222,6 +222,10 @@ T::native_type construct_new_java_enum(JNIEnv* env, typename T::enum_type::enum_
     static_assert(std::is_same_v<typename T::native_type, jobject>);
     jobject _t_field_value = env->GetStaticObjectField(_t_class, _t_field_id);
 
+    if (env->ExceptionCheck() == JNI_TRUE) {
+        throw JavaExceptionAlreadyThrown();
+    }
+
     if (_t_field_value == nullptr) {
         std::string error = "Could not get static field '";
         error += field_name;
@@ -230,10 +234,6 @@ T::native_type construct_new_java_enum(JNIEnv* env, typename T::enum_type::enum_
         error += "'";
 
         throw JavaException(RuntimeException, error);
-    }
-
-    if (env->ExceptionCheck() == JNI_TRUE) {
-        throw JavaExceptionAlreadyThrown();
     }
 
     return _t_field_value;

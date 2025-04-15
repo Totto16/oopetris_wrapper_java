@@ -53,15 +53,19 @@ jthrowable CPPStackTraceEntry::add_stack_trace_to_throwable(JNIEnv* env, jthrowa
 
     jobjectArray current_stack_trace_array = static_cast<jobjectArray>(current_stack_trace);
 
-    if (current_stack_trace == nullptr) {
-        throw JavaException(RuntimeException, "Error in call to Throwable::getStackTrace");
-    }
-
     if (env->ExceptionCheck() == JNI_TRUE) {
         throw JavaExceptionAlreadyThrown();
     }
 
+    if (current_stack_trace == nullptr) {
+        throw JavaException(RuntimeException, "Error in call to Throwable::getStackTrace");
+    }
+
     jclass stack_trace_element_class = env->FindClass(JStackTraceElement::java_class);
+
+    if (env->ExceptionCheck() == JNI_TRUE) {
+        throw JavaExceptionAlreadyThrown();
+    }
 
     if (stack_trace_element_class == nullptr) {
         std::string error = "No class with the name '";
@@ -69,10 +73,6 @@ jthrowable CPPStackTraceEntry::add_stack_trace_to_throwable(JNIEnv* env, jthrowa
         error += "' found";
 
         throw JavaException(NoClassDefFoundError, error);
-    }
-
-    if (env->ExceptionCheck() == JNI_TRUE) {
-        throw JavaExceptionAlreadyThrown();
     }
 
     jsize array_length = env->GetArrayLength(current_stack_trace_array);
@@ -104,7 +104,6 @@ jthrowable CPPStackTraceEntry::add_stack_trace_to_throwable(JNIEnv* env, jthrowa
 
     env->CallVoidMethod(throwable, set_stack_trace_function, new_stack_trace_array);
 
-
     if (env->ExceptionCheck() == JNI_TRUE) {
         throw JavaExceptionAlreadyThrown();
     }
@@ -113,7 +112,7 @@ jthrowable CPPStackTraceEntry::add_stack_trace_to_throwable(JNIEnv* env, jthrowa
 
     // if such exception happen, just report them as Fatal, as this function should enver fail in any way!
     } catch (const std::runtime_error& raw_exception) {
-        std::string fatal_error = "FATAL: WHil adding a stack trace to a exception, another exception was thrown: ";
+        std::string fatal_error = "While adding a stack trace to a exception, another exception was thrown: ";
         fatal_error += raw_exception.what();
 
         JNI_fatal_error(env, fatal_error);
