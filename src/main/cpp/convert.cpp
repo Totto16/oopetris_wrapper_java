@@ -3,7 +3,8 @@
 #include "./convert.h"
 
 #include "./helper.h"
-
+#include "./list.h"
+#include "./map.h"
 
 struct JAdditionalInformationValue {
 
