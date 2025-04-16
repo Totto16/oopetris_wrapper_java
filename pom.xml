@@ -13,6 +13,9 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>17</maven.compiler.release>
+    <project.build.meson.buildtype>debug</project.build.meson.buildtype>
+    <project.build.meson.default_library>shared</project.build.meson.default_library>
+    <project.build.meson.clang_libcpp>auto</project.build.meson.clang_libcpp>
   </properties>
 
   <packaging>jar</packaging>
@@ -113,6 +116,9 @@
                   <arg value="-Dversion_range_for_java=>=${ant.java.version}"/>
                   <arg value="-Dprefix=${project.build.outputDirectory}/cpp/install/"/>
                   <arg value="-Db_vscrt=static_from_buildtype"/>
+                  <arg value="-Dbuildtype=${project.build.meson.buildtype}"/>
+                  <arg value="-Ddefault_library=${project.build.meson.default_library}"/>
+                  <arg value="-Dclang_libcpp=${project.build.meson.clang_libcpp}"/>
                 </exec>
 
                 <exec executable="meson" dir="${project.basedir}/src/main/cpp/" failifexecutionfails="true">
