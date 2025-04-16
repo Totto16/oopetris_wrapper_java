@@ -88,15 +88,29 @@ endif
 
 java_include_dirs = [include_directories(java_home / 'include')]
 
-test_folders = ['win32', 'darwin', 'linux']
+additional_java_include_folders = []
 
-foreach test_folder : test_folders
+if host_machine.system() == 'darwin'
+    additional_java_include_folders += 'darwin'
+elif host_machine.system() == 'linux'
+    additional_java_include_folders += 'linux'
+elif host_machine.system() == 'windows'
+    additional_java_include_folders += 'win32'
+endif
 
-    test_folder_path = java_home / 'include' / test_folder
+foreach additional_folder : additional_java_include_folders
 
-    if fs.exists(test_folder_path)
-        java_include_dirs += include_directories(test_folder_path)
+    folder_path = java_home / 'include' / additional_folder
+
+    if not fs.exists(folder_path)
+        error(
+            'Additioanl include folder'
+            + folder_path
+            + ' is required on machine '
+            + host_machine.system(),
+        )
     endif
+    java_include_dirs += include_directories(folder_path)
 
 endforeach
 
