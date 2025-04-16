@@ -192,9 +192,9 @@ std::pair<jclass, typename T::native_type> construct_new_java_object(JNIEnv* env
 
 template<typename T>
 concept IsJavaEnum = requires(T) {
-    typename T::enum_type;
-    std::is_enum_v<typename T::enum_type>;
-    requires requires(T::enum_type val) {
+    typename T::c_enum;
+    std::is_enum_v<typename T::c_enum>;
+    requires requires(T::c_enum val) {
         { T::value_to_string(val) } -> std::convertible_to<std::string>;
     };
 };
@@ -209,7 +209,7 @@ static_assert(not IsJavaTypeDescriptionForEnum<bool>);
 
 template<typename T>
     requires IsJavaTypeDescriptionForEnum<T>
-T::native_type construct_new_java_enum(JNIEnv* env, typename T::enum_type::enum_type value) {
+T::native_type construct_new_java_enum(JNIEnv* env, typename T::enum_type::c_enum value) {
     using EnumType = T::enum_type;
     static_assert(IsJavaEnum<EnumType>);
 
@@ -301,7 +301,7 @@ struct JBooleanDescription {
 
     using native_type = jobject;
 
-    using constructor = struct {
+    using constructor = struct constructor {
         using inner = std::tuple<JBoolLiteralDescription>;
     };
 };
@@ -315,7 +315,7 @@ struct JFloatDescription {
 
     using native_type = jobject;
 
-    using constructor = struct {
+    using constructor = struct constructor {
         using inner = std::tuple<JFloatLiteralDescription>;
     };
 };
@@ -329,7 +329,7 @@ struct JDoubleDescription {
 
     using native_type = jobject;
 
-    using constructor = struct {
+    using constructor = struct constructor {
         using inner = std::tuple<JDoubleLiteralDescription>;
     };
 };
@@ -343,7 +343,7 @@ struct JByteDescription {
 
     using native_type = jobject;
 
-    using constructor = struct {
+    using constructor = struct constructor {
         using inner = std::tuple<JByteLiteralDescription>;
     };
 };
@@ -357,7 +357,7 @@ struct JIntegerDescription {
 
     using native_type = jobject;
 
-    using constructor = struct {
+    using constructor = struct constructor {
         using inner = std::tuple<JIntLiteralDescription>;
     };
 };
@@ -371,7 +371,7 @@ struct JLongDescription {
 
     using native_type = jobject;
 
-    using constructor = struct {
+    using constructor = struct constructor {
         using inner = std::tuple<JLongLiteralDescription>;
     };
 };

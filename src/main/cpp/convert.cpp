@@ -248,8 +248,8 @@ struct JInputEvent {
 
     using native_type = jobject;
 
-    using enum_type = struct {
-        using enum_type = InputEvent;
+    using enum_type = struct enum_type {
+        using c_enum = InputEvent;
         static std::string value_to_string(InputEvent event) {
             switch (event) {
                 case InputEvent::RotateLeftPressed:
@@ -303,7 +303,7 @@ struct JTetrionRecord {
 
     using native_type = jobject;
 
-    using constructor = struct {
+    using constructor = struct constructor {
         using inner = std::tuple<JInputEvent, JU64Description, JU8Description>;
     };
 };
@@ -351,7 +351,7 @@ struct JTetrionHeader {
 
     using native_type = jobject;
 
-    using constructor = struct {
+    using constructor = struct constructor {
         using inner = std::tuple<JU64Description, JU32Description>;
     };
 };
@@ -396,7 +396,7 @@ struct JMinoPosition {
 
     using native_type = jobject;
 
-    using constructor = struct {
+    using constructor = struct constructor {
         using inner = std::tuple<JU8Description, JU8Description>;
     };
 };
@@ -427,8 +427,8 @@ struct JTetrominoType {
 
     using native_type = jobject;
 
-    using enum_type = struct {
-        using enum_type = helper::TetrominoType;
+    using enum_type = struct enum_type {
+        using c_enum = helper::TetrominoType;
         static std::string value_to_string(helper::TetrominoType type) {
             switch (type) {
                 case helper::TetrominoType::I: {
@@ -475,7 +475,7 @@ struct JMino {
 
     using native_type = jobject;
 
-    using constructor = struct {
+    using constructor = struct constructor {
         using inner = std::tuple<JMinoPosition, JTetrominoType>;
     };
 };
@@ -520,7 +520,7 @@ struct JTetrionSnapshot {
 
     using native_type = jobject;
 
-    using constructor = struct {
+    using constructor = struct constructor {
         using inner = std::tuple<
                 JU32Description,
                 JU32Description,
@@ -585,7 +585,7 @@ struct JRecordingInformation {
     using native_type = jobject;
 
 
-    using constructor = struct {
+    using constructor = struct constructor {
         using inner = std::tuple<JMapDescription, JListDescription, JListDescription, JListDescription, JU8Description>;
     };
 };
@@ -626,7 +626,7 @@ struct JGridProperties {
 
     using native_type = jobject;
 
-    using constructor = struct {
+    using constructor = struct constructor {
         using inner = std::tuple<JU8Description, JU8Description>;
     };
 };
@@ -642,7 +642,7 @@ struct JRecordingProperties {
 
     using native_type = jobject;
 
-    using constructor = struct {
+    using constructor = struct constructor {
         using inner = std::tuple<JGridProperties>;
     };
 };

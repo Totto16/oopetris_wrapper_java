@@ -33,7 +33,7 @@ struct JStackTraceElement {
 
     using native_type = jobject;
 
-    using constructor = struct {
+    using constructor = struct constructor {
         using inner = std::tuple<
                 JStringDescription,
                 JStringDescription,
