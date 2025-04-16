@@ -151,7 +151,7 @@ jobs:
       - name: Compile Java + JNI Code
         run: |
           mvn initialize --no-transfer-progress
-          mvn compile --no-transfer-progress "-Dproject.build.meson.buildtype=release" "-Dproject.build.meson.default_library=static" "-Dproject.build.meson.clang_libcpp=${{ ( matrix.config.os == 'macos' || ( matrix.config.os == 'ubuntu' && matrix.config.use-clang == true ) ) && 'enabled' || 'disabled' }}"
+          mvn compile --no-transfer-progress "-Dproject.build.meson.buildtype=release" "-Dproject.build.meson.default_library=static" "-Dproject.build.meson.clang_libcpp=${{ ( matrix.config.os == 'macos' || ( matrix.config.os == 'ubuntu' && matrix.config.use-clang == true ) ) && 'enabled' || 'disabled' }}" "-Dproject.build.meson.additional_setup_arguments=${{ matrix.config.os == 'windows' && '-Db_vscrt=static_from_buildtype' || '' }}" 
 
       ## TODO: run tests on windows too
       - name: Run Java Tests
