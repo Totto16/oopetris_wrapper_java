@@ -3,6 +3,8 @@
 #include "./exceptions.h"
 #include "./stacktrace.h"
 
+#include <core/helper/utils.hpp>
+
 JavaException::JavaException(std::string class_name)
     : std::runtime_error{ "JavaException" },
       m_class_name{ class_name },
