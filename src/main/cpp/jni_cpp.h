@@ -162,17 +162,17 @@ std::pair<jclass, typename T::native_type> construct_new_java_object_extended(JN
     static_assert(std::is_same_v<std::tuple<Args...>, details::map_to_expected_types<ConstructorToUse>>);
 
 
-    const auto [_t_class, _t_constructor] =
+    const auto [t_class, t_constructor] =
             get_constructor_for_class(env, T::java_class, details::java_get_string_for_constructor<ConstructorToUse>());
 
 
-    jobject _object_instance = env->NewObject(_t_class, _t_constructor, args...);
+    jobject object_instance = env->NewObject(t_class, t_constructor, args...);
 
     if (env->ExceptionCheck() == JNI_TRUE) {
         throw JavaExceptionAlreadyThrown();
     }
 
-    if (_object_instance == nullptr) {
+    if (object_instance == nullptr) {
         std::string error = "Could not construct '";
         error += T::java_class;
         error += "'";
@@ -180,7 +180,7 @@ std::pair<jclass, typename T::native_type> construct_new_java_object_extended(JN
         throw JavaException(ExceptionInInitializerError, error);
     }
 
-    return std::make_pair(_t_class, _object_instance);
+    return std::make_pair(t_class, object_instance);
 }
 
 template<typename T, typename... Args>
@@ -215,10 +215,10 @@ T::native_type construct_new_java_enum(JNIEnv* env, typename T::enum_type::c_enu
 
     std::string field_name = EnumType::value_to_string(value);
 
-    const auto [_t_class, _t_field_id] = get_static_field_for_class(env, T::java_class, field_name, T::java_type);
+    const auto [t_class, t_field_id] = get_static_field_for_class(env, T::java_class, field_name, T::java_type);
 
     static_assert(std::is_same_v<typename T::native_type, jobject>);
-    jobject _t_field_value = env->GetStaticObjectField(_t_class, _t_field_id);
+    jobject _t_field_value = env->GetStaticObjectField(t_class, t_field_id);
 
     if (env->ExceptionCheck() == JNI_TRUE) {
         throw JavaExceptionAlreadyThrown();

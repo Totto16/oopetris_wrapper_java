@@ -106,37 +106,37 @@ static jobject information_value_to_java(JNIEnv* env, const recorder::Informatio
                         STACK_TRACE_ADD_RECORDINGS_OVERLOADED("string", _stack_scope)
                         jstring jstr = JNI_get_jstring(env, value);
 
-                        const auto [_, jinformation_value] = construct_new_java_object_extended<
+                        const auto [IGNORE_THIS, jinformation_value] = construct_new_java_object_extended<
                                 JAdditionalInformationValue, JAdditionalInformationValueConstructorString>(env, jstr);
 
                         return jinformation_value;
                     },
                     [&env](const float& value) -> jobject {
                         STACK_TRACE_ADD_RECORDINGS_OVERLOADED("float", _stack_scope)
-                        const auto [_, jvalue] =
+                        const auto [IGNORE_THIS, jvalue] =
                                 construct_new_java_object<JFloatDescription>(env, static_cast<jfloat>(value));
 
-                        const auto [_2, jinformation_value] = construct_new_java_object_extended<
+                        const auto [IGNORE_THIS, jinformation_value] = construct_new_java_object_extended<
                                 JAdditionalInformationValue, JAdditionalInformationValueConstructorFloat>(env, jvalue);
 
                         return jinformation_value;
                     },
                     [&env](const double& value) -> jobject {
                         STACK_TRACE_ADD_RECORDINGS_OVERLOADED("double", _stack_scope)
-                        const auto [_, jvalue] =
+                        const auto [IGNORE_THIS, jvalue] =
                                 construct_new_java_object<JDoubleDescription>(env, static_cast<jdouble>(value));
 
-                        const auto [_2, jinformation_value] = construct_new_java_object_extended<
+                        const auto [IGNORE_THIS, jinformation_value] = construct_new_java_object_extended<
                                 JAdditionalInformationValue, JAdditionalInformationValueConstructorDouble>(env, jvalue);
 
                         return jinformation_value;
                     },
                     [&env](const bool& value) -> jobject {
                         STACK_TRACE_ADD_RECORDINGS_OVERLOADED("bool", _stack_scope)
-                        const auto [_, jvalue] =
+                        const auto [IGNORE_THIS, jvalue] =
                                 construct_new_java_object<JBooleanDescription>(env, static_cast<jboolean>(value));
 
-                        const auto [_2, jinformation_value] = construct_new_java_object_extended<
+                        const auto [IGNORE_THIS, jinformation_value] = construct_new_java_object_extended<
                                 JAdditionalInformationValue, JAdditionalInformationValueConstructorBoolean>(
                                 env, jvalue
                         );
@@ -147,17 +147,17 @@ static jobject information_value_to_java(JNIEnv* env, const recorder::Informatio
                         STACK_TRACE_ADD_RECORDINGS_OVERLOADED("u8", _stack_scope)
                         jobject u8_value = construct_u8(env, value);
 
-                        const auto [_, jinformation_value] = construct_new_java_object_extended<
+                        const auto [IGNORE_THIS, jinformation_value] = construct_new_java_object_extended<
                                 JAdditionalInformationValue, JAdditionalInformationValueConstructorU8>(env, u8_value);
 
                         return jinformation_value;
                     },
                     [&env](const i8& value) -> jobject {
                         STACK_TRACE_ADD_RECORDINGS_OVERLOADED("i8", _stack_scope)
-                        const auto [_, jvalue] =
+                        const auto [IGNORE_THIS, jvalue] =
                                 construct_new_java_object<JByteDescription>(env, static_cast<jbyte>(value));
 
-                        const auto [_2, jinformation_value] = construct_new_java_object_extended<
+                        const auto [IGNORE_THIS, jinformation_value] = construct_new_java_object_extended<
                                 JAdditionalInformationValue, JAdditionalInformationValueConstructorI8>(env, jvalue);
 
                         return jinformation_value;
@@ -166,17 +166,17 @@ static jobject information_value_to_java(JNIEnv* env, const recorder::Informatio
                         STACK_TRACE_ADD_RECORDINGS_OVERLOADED("u32", _stack_scope)
                         jobject u32_value = construct_u32(env, value);
 
-                        const auto [_, jinformation_value] = construct_new_java_object_extended<
+                        const auto [IGNORE_THIS, jinformation_value] = construct_new_java_object_extended<
                                 JAdditionalInformationValue, JAdditionalInformationValueConstructorU32>(env, u32_value);
 
                         return jinformation_value;
                     },
                     [&env](const i32& value) -> jobject {
                         STACK_TRACE_ADD_RECORDINGS_OVERLOADED("i32", _stack_scope)
-                        const auto [_, jvalue] =
+                        const auto [IGNORE_THIS, jvalue] =
                                 construct_new_java_object<JIntegerDescription>(env, static_cast<jint>(value));
 
-                        const auto [_2, jinformation_value] = construct_new_java_object_extended<
+                        const auto [IGNORE_THIS, jinformation_value] = construct_new_java_object_extended<
                                 JAdditionalInformationValue, JAdditionalInformationValueConstructorI32>(env, jvalue);
 
                         return jinformation_value;
@@ -185,17 +185,17 @@ static jobject information_value_to_java(JNIEnv* env, const recorder::Informatio
                         STACK_TRACE_ADD_RECORDINGS_OVERLOADED("u64", _stack_scope)
                         jobject u64_value = construct_u64(env, value);
 
-                        const auto [_, jinformation_value] = construct_new_java_object_extended<
+                        const auto [IGNORE_THIS, jinformation_value] = construct_new_java_object_extended<
                                 JAdditionalInformationValue, JAdditionalInformationValueConstructorU64>(env, u64_value);
 
                         return jinformation_value;
                     },
                     [&env](const i64& value) -> jobject {
                         STACK_TRACE_ADD_RECORDINGS_OVERLOADED("i64", _stack_scope)
-                        const auto [_, jvalue] =
+                        const auto [IGNORE_THIS, jvalue] =
                                 construct_new_java_object<JLongDescription>(env, static_cast<jlong>(value));
 
-                        const auto [_2, jinformation_value] = construct_new_java_object_extended<
+                        const auto [IGNORE_THIS, jinformation_value] = construct_new_java_object_extended<
                                 JAdditionalInformationValue, JAdditionalInformationValueConstructorI64>(env, jvalue);
 
                         return jinformation_value;
@@ -321,7 +321,7 @@ static jobject record_to_java(JNIEnv* env, const recorder::Record& record) {
 
     jobject java_tetrion_index = construct_u8(env, record.tetrion_index);
 
-    const auto [_, jrecord] =
+    const auto [IGNORE_THIS, jrecord] =
             construct_new_java_object<JTetrionRecord>(env, java_event, java_simulation_step_index, java_tetrion_index);
 
     return jrecord;
@@ -367,7 +367,7 @@ static jobject header_to_java(JNIEnv* env, const recorder::TetrionHeader& header
 
     jobject java_starting_level = construct_u32(env, header.starting_level);
 
-    const auto [_, jheader] = construct_new_java_object<JTetrionHeader>(env, java_seed, java_starting_level);
+    const auto [IGNORE_THIS, jheader] = construct_new_java_object<JTetrionHeader>(env, java_seed, java_starting_level);
 
     return jheader;
 }
@@ -414,7 +414,7 @@ static jobject mino_position_to_java(JNIEnv* env, const grid::GridPoint& mino_po
 
     jobject java_y = construct_u8(env, mino_pos.y);
 
-    const auto [_, jmino_position] = construct_new_java_object<JMinoPosition>(env, java_x, java_y);
+    const auto [IGNORE_THIS, jmino_position] = construct_new_java_object<JMinoPosition>(env, java_x, java_y);
 
     return jmino_position;
 }
@@ -491,7 +491,7 @@ static jobject mino_to_java(JNIEnv* env, const Mino& mino) {
 
     jobject java_type = tetromino_type_to_java(env, mino.type());
 
-    const auto [_, jmino] = construct_new_java_object<JMino>(env, java_position, java_type);
+    const auto [IGNORE_THIS, jmino] = construct_new_java_object<JMino>(env, java_position, java_type);
 
     return jmino;
 }
@@ -551,7 +551,7 @@ static jobject snapshot_to_java(JNIEnv* env, const TetrionSnapshot& snapshot) {
 
     auto jtetrion_index = construct_u8(env, snapshot.tetrion_index());
 
-    const auto [_, recording_information] = construct_new_java_object<JTetrionSnapshot>(
+    const auto [IGNORE_THIS, recording_information] = construct_new_java_object<JTetrionSnapshot>(
             env, jlevel, jlines_cleared, jmino_stack, jscore, jsimulation_step_index, jtetrion_index
     );
 
@@ -610,7 +610,7 @@ jobject recording_reader_to_java(JNIEnv* env, const recorder::RecordingReader& r
 
     // call the correct constructor
 
-    const auto [_, recording_information] = construct_new_java_object<JRecordingInformation>(
+    const auto [IGNORE_THIS, recording_information] = construct_new_java_object<JRecordingInformation>(
             env, jinformation, jrecords, jsnapshots, jtetrion_headers, jversion
     );
 
@@ -659,9 +659,10 @@ jobject properties_to_java(JNIEnv* env) {
 
     jobject jwidth = construct_u8(env, grid::width_in_tiles);
 
-    const auto [_, grid_properties] = construct_new_java_object<JGridProperties>(env, jheight, jwidth);
+    const auto [IGNORE_THIS, grid_properties] = construct_new_java_object<JGridProperties>(env, jheight, jwidth);
 
-    const auto [_2, recording_properties] = construct_new_java_object<JRecordingProperties>(env, grid_properties);
+    const auto [IGNORE_THIS, recording_properties] =
+            construct_new_java_object<JRecordingProperties>(env, grid_properties);
 
     return recording_properties;
 }
