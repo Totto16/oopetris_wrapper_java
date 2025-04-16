@@ -25,6 +25,12 @@ jobs:
           - name: Linux
             os: ubuntu
             os-version: 24.04
+            use-clang: false
+
+          - name: Linux Clang
+            os: ubuntu
+            os-version: 24.04
+            use-clang: true
 
           - name: MacOS
             os: macos
@@ -55,8 +61,19 @@ jobs:
           arch: x64
           toolset: 14.43
 
+      - name: Setup Clang (Linux)
+        if: matrix.config.os == 'ubuntu' && matrix.config.use-clang == true
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 19
+          sudo apt-get install libc++-19* libc++abi*19* -y --no-install-recommends
+          echo "CC=clang-19" >> "$GITHUB_ENV"
+          echo "CXX=clang++-19" >> "$GITHUB_ENV"
+          echo "OBJC=clang-19" >> "$GITHUB_ENV"
+
       - name: Setup GCC (Linux)
-        if: matrix.config.os == 'ubuntu'
+        if: matrix.config.os == 'ubuntu' && matrix.config.use-clang == false
         uses: egor-tensin/setup-gcc@v1
         with:
           version: 14
@@ -116,7 +133,7 @@ jobs:
       - name: Build and Install OOPetris
         run: |
           cd oopetris
-          meson setup build -Dbuildtype=release -Ddefault_library=static -Dclang_libcpp=${{ matrix.config.os == 'macos' && 'enabled' || 'disabled' }} -Donly_build_libs=true ${{ matrix.config.os == 'windows' && '-Db_vscrt=static_from_buildtype' || '' }}
+          meson setup build -Dbuildtype=release -Ddefault_library=static -Dclang_libcpp=${{ ( matrix.config.os == 'macos' || ( matrix.config.os == 'ubuntu' && matrix.config.use-clang == true ) ) && 'enabled' || 'disabled' }} -Donly_build_libs=true ${{ matrix.config.os == 'windows' && '-Db_vscrt=static_from_buildtype' || '' }}
           ${{ matrix.config.os == 'ubuntu' && 'sudo' || '' }} meson install -C build
           ${{ matrix.config.os == 'ubuntu' && 'sudo ldconfig' || '' }}
 
