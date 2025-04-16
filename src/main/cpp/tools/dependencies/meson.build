@@ -88,7 +88,7 @@ endif
 
 java_include_dirs = [include_directories(java_home / 'include')]
 
-test_folders = ['windows', 'macos', 'linux']
+test_folders = ['windows', 'darwin', 'linux']
 
 foreach test_folder : test_folders
 
