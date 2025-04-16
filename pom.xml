@@ -72,7 +72,6 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>3.3.0</version>
           <configuration>
-            <forkMode>once</forkMode>
             <argLine>-Djava.library.path=${project.build.outputDirectory}/cpp/install/lib/x86_64-linux-gnu:${project.build.outputDirectory}/cpp/install/lib/win32:${project.build.outputDirectory}/cpp/install/lib</argLine>
           </configuration>
         </plugin>
@@ -109,8 +108,9 @@
             <id>jni</id>
             <phase>compile</phase>
             <configuration>
+              <failOnError>true</failOnError>
               <target name="jni" description="Compile the native code">
-                <exec executable="meson" dir="${project.basedir}/src/main/cpp/" failifexecutionfails="true">
+                <exec executable="meson" dir="${project.basedir}/src/main/cpp/" failonerror="true" failifexecutionfails="true">
                   <arg value="setup" />
                   <arg value="${project.build.outputDirectory}/cpp/" />
                   <arg value="-Dversion_range_for_java=>=${ant.java.version}"/>
@@ -121,13 +121,13 @@
                   <arg value="-Dclang_libcpp=${project.build.meson.clang_libcpp}"/>
                 </exec>
 
-                <exec executable="meson" dir="${project.basedir}/src/main/cpp/" failifexecutionfails="true">
+                <exec executable="meson" dir="${project.basedir}/src/main/cpp/" failonerror="true" failifexecutionfails="true">
                   <arg value="compile" />
                   <arg value="-C" />
                   <arg value="${project.build.outputDirectory}/cpp/" />
                 </exec>
 
-                <exec executable="meson" dir="${project.basedir}/src/main/cpp/" failifexecutionfails="true">
+                <exec executable="meson" dir="${project.basedir}/src/main/cpp/" failonerror="true" failifexecutionfails="true">
                   <arg value="install" />
                   <arg value="-C" />
                   <arg value="${project.build.outputDirectory}/cpp/" />
