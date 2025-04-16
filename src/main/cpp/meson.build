@@ -41,7 +41,6 @@ liboopetris_java_wrapper_native = library(
     'oopetris_java_wrapper_native',
     src_files,
     dependencies: deps,
-    cpp_shared_args: ['-DOOPETRIS_LIBRARY_C_WRAPPER_EXPORT'],
     override_options: {
         'warning_level': '3',
         'werror': true,
