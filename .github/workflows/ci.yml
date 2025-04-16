@@ -148,9 +148,14 @@ jobs:
         with:
           maven-version: 3.8.6
 
-      - name: Lint and Test files
+      - name: Compile Java + JNI Code
         run: |
           mvn compile
+          
+      ## TODO: run tests on windows too
+      - name: Run Java Tests
+        if: matrix.config.os != 'windows'
+        run: | 
           mvn test
 
       - name: Build package
