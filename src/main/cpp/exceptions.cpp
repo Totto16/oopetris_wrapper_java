@@ -52,8 +52,8 @@ static void JNI_throw_java_exception_impl(
     if (result != JNI_OK) {
 
         if (fatal_on_error) {
-            std::string fatal_error = "Couldn't throw a native Java exception: ThrowNew failed with code";
-            fatal_error += result;
+            std::string fatal_error = "Couldn't throw a native Java exception: ThrowNew failed with code ";
+            fatal_error += std::to_string(result);
 
             JNI_fatal_error(env, fatal_error);
         }
@@ -93,8 +93,8 @@ void JNI_add_stack_trace_to_exception(JNIEnv* env) {
         jint result = env->Throw(new_throwable);
 
         if (result != JNI_OK) {
-            std::string fatal_error = "Couldn't throw a native Java exception: Throw failed with code";
-            fatal_error += result;
+            std::string fatal_error = "Couldn't throw a native Java exception: Throw failed with code ";
+            fatal_error += std::to_string(result);
 
             JNI_fatal_error(env, fatal_error);
         }
