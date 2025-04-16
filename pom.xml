@@ -13,7 +13,13 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>17</maven.compiler.release>
+    <project.build.meson.buildtype>debug</project.build.meson.buildtype>
+    <project.build.meson.default_library>shared</project.build.meson.default_library>
+    <project.build.meson.clang_libcpp>auto</project.build.meson.clang_libcpp>
+    <project.build.meson.additional_setup_arguments></project.build.meson.additional_setup_arguments>
   </properties>
+
+  <packaging>jar</packaging>
 
   <dependencyManagement>
     <dependencies>
@@ -66,6 +72,9 @@
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>3.3.0</version>
+          <configuration>
+            <argLine>-Djava.library.path=${project.build.outputDirectory}/cpp/install/lib/x86_64-linux-gnu:${project.build.outputDirectory}/cpp/install/lib/win32:${project.build.outputDirectory}/cpp/install/lib</argLine>
+          </configuration>
         </plugin>
         <plugin>
           <artifactId>maven-jar-plugin</artifactId>
@@ -90,5 +99,71 @@
         </plugin>
       </plugins>
     </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <id>jni</id>
+            <phase>compile</phase>
+            <configuration>
+              <failOnError>true</failOnError>
+              <target name="jni" description="Compile the native code">
+                <exec executable="meson" dir="${project.basedir}/src/main/cpp/" failonerror="true" failifexecutionfails="true">
+                  <arg value="setup" />
+                  <arg value="${project.build.outputDirectory}/cpp/" />
+                  <arg value="-Dversion_range_for_java=>=${ant.java.version}"/>
+                  <arg value="-Dprefix=${project.build.outputDirectory}/cpp/install/"/>
+                  <arg value="-Dbuildtype=${project.build.meson.buildtype}"/>
+                  <arg value="-Ddefault_library=${project.build.meson.default_library}"/>
+                  <arg value="-Dclang_libcpp=${project.build.meson.clang_libcpp}"/>
+                  <arg line="${project.build.meson.additional_setup_arguments}"/>
+                </exec>
+
+                <exec executable="meson" dir="${project.basedir}/src/main/cpp/" failonerror="true" failifexecutionfails="true">
+                  <arg value="compile" />
+                  <arg value="-C" />
+                  <arg value="${project.build.outputDirectory}/cpp/" />
+                </exec>
+
+                <exec executable="meson" dir="${project.basedir}/src/main/cpp/" failonerror="true" failifexecutionfails="true">
+                  <arg value="install" />
+                  <arg value="-C" />
+                  <arg value="${project.build.outputDirectory}/cpp/" />
+                </exec>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>jni-clean</id>
+            <phase>clean</phase>
+            <configuration>
+              <target name="jni-clean" description="Cleanup JNI code">
+                <delete dir="${project.build.outputDirectory}/cpp/"/>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+
+    <resources>
+      <resource>
+        <directory>${project.build.outputDirectory}/cpp/install/</directory>
+        <includes>
+          <include>**.so</include>
+        </includes>
+      </resource>
+    </resources>
+
+
   </build>
 </project>

@@ -21,7 +21,7 @@
         exception.throw_java_exception(env);                                   \
         return error_return_value;                                             \
     }                                                                          \
-    catch (const JavaExceptionAlreadyThrown& _) {                              \
+    catch (const JavaExceptionAlreadyThrown&) {                                \
         JNI_add_stack_trace_to_exception(env);                                 \
         return error_return_value;                                             \
     }                                                                          \

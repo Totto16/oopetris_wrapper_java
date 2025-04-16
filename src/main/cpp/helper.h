@@ -47,7 +47,6 @@
 
 #define JAVA_OOPETRIS_CLASS(name) JAVA_OOPETRIS_CLASS_NAME JAVA_CLASS_NAME_SEPERATOR name
 
-
 // base names
 
 #define JAVA_LANG_BASE_PACKAGE "java" JAVA_CLASS_NAME_SEPERATOR "lang"
@@ -124,7 +123,21 @@
 
 #define JAVA_LONG_CLASS JAVA_LANG_BASE_PACKAGE JAVA_CLASS_NAME_SEPERATOR "Long"
 
-#define JAVA_OBJECT_CLASS  JAVA_LANG_BASE_PACKAGE JAVA_CLASS_NAME_SEPERATOR "Object"
+#define JAVA_OBJECT_CLASS JAVA_LANG_BASE_PACKAGE JAVA_CLASS_NAME_SEPERATOR "Object"
+
+// general helpers
+
+#if __cplusplus >= 202600L
+// since c++26
+#define IGNORE_THIS _
+#else
+// see https://stackoverflow.com/questions/40673080/stdignore-with-structured-bindings
+#define CUSTOM_CONCAT(x, y) x##y
+#define C_CONCAT(x, y) CUSTOM_CONCAT(x, y)
+#define IGNORE_THIS C_CONCAT(__tmp_ignore_var_, __LINE__)
+
+#endif
+
 
 // functions
 

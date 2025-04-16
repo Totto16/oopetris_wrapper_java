@@ -23,7 +23,7 @@
 
     jint lineNumber = static_cast<jint>(m_line_number);
 
-    const auto [_, jstacktrace_element] = construct_new_java_object<JStackTraceElement>(
+    const auto [IGNORE_THIS, jstacktrace_element] = construct_new_java_object<JStackTraceElement>(
             env, classLoaderName, moduleName, moduleVersion, declaringClass, methodName, fileName, lineNumber
     );
 
@@ -152,7 +152,7 @@ jthrowable CPPStackTraceEntry::add_stack_trace_to_throwable(JNIEnv* env, jthrowa
 
     // set the value
 
-    const auto [_2, set_stack_trace_function] = get_method_for_class(
+    const auto [IGNORE_THIS, set_stack_trace_function] = get_method_for_class(
             env, jthrowable_class, "setStackTrace", method_type(stack_trace_element_array_type, VOID_LITERAL_TYPE)
     );
 

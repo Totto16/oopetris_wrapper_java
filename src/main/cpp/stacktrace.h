@@ -19,7 +19,13 @@
     };
 #endif
 
-#define STACK_TRACE_ADD(CLASS_NAME, local_name) STACK_TRACE_ADD_CUSTOM(CLASS_NAME, __PRETTY_FUNCTION__, local_name)
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#define CURRENT_FUNC  __FUNCSIG__
+#else
+#define CURRENT_FUNC __PRETTY_FUNCTION__
+#endif
+
+#define STACK_TRACE_ADD(CLASS_NAME, local_name) STACK_TRACE_ADD_CUSTOM(CLASS_NAME, CURRENT_FUNC, local_name)
 
 // java descriptions
 
@@ -33,7 +39,7 @@ struct JStackTraceElement {
 
     using native_type = jobject;
 
-    using constructor = struct {
+    using constructor = struct constructor {
         using inner = std::tuple<
                 JStringDescription,
                 JStringDescription,

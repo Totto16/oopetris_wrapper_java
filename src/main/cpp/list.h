@@ -81,7 +81,7 @@ public:
     [[nodiscard]] jboolean append(JNIEnv* env, T::native_type elem) {
         STACK_TRACE_ADD(JAVA_LIST_CLASS, _stack_scope)
 
-        const auto [_, list_add_function] =
+        const auto [IGNORE_THIS, list_add_function] =
                 get_method_for_class(env, m_class_impl, "add", method_type(JObjectDescprition::java_type, BOOLEAN_LITERAL_TYPE));
 
 
