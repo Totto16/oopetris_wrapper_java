@@ -132,6 +132,18 @@
               <goal>run</goal>
             </goals>
           </execution>
+          <execution>
+            <id>jni-clean</id>
+            <phase>clean</phase>
+            <configuration>
+              <target name="jni-clean" description="Cleanup JNI code">
+                <delete dir="${project.build.outputDirectory}/cpp/"/>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
         </executions>
       </plugin>
     </plugins>
