@@ -160,7 +160,7 @@ jobs:
 
       - name: Build package
         run: |
-          mvn package -Dmaven.test.skip
+          mvn package "-Dmaven.test.skip"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
