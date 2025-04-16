@@ -70,7 +70,7 @@
           <version>3.3.0</version>
           <configuration>
             <forkMode>once</forkMode>
-            <argLine>-Djava.library.path=${project.build.outputDirectory}/cpp/install/lib/x86_64-linux-gnu:${project.build.outputDirectory}/cpp/install/lib/win32:${project.build.outputDirectory}/cpp/install/lib/macos</argLine>
+            <argLine>-Djava.library.path=${project.build.outputDirectory}/cpp/install/lib/x86_64-linux-gnu:${project.build.outputDirectory}/cpp/install/lib/win32:${project.build.outputDirectory}/cpp/install/lib</argLine>
           </configuration>
         </plugin>
         <plugin>
